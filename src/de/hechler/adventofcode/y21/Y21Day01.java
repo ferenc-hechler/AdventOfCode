@@ -16,7 +16,7 @@ import java.util.Set;
  * see: https://adventofcode.com/2021/day/1
  *
  */
-public class Day01Y21 {
+public class Y21Day01 {
 
 	
 	public static void mainPart1() throws FileNotFoundException {
