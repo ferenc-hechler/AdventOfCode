@@ -13,7 +13,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 /**
- * see: https://adventofcode.com/2021/day/1
+ * see: https://adventofcode.com/2021/day/2
  *
  */
 public class Y21Day02 {

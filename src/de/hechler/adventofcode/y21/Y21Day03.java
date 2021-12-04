@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * see: https://adventofcode.com/2021/day/1
+ * see: https://adventofcode.com/2021/day/3
  *
  */
 public class Y21Day03 {
