@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -137,11 +138,57 @@ public class Y21Day04 {
 		}
 	}
 
+	public static void mainPart2() throws FileNotFoundException {
+		try (Scanner scanner = new Scanner(new File("input/y21/day04.txt"))) {
+			List<BingoBoard> bbs = new ArrayList<>();
+			int[] drawnNumbers = Utils.map2intArray(scanner.nextLine().split("\\s*,\\s*"), Integer::parseInt);
+			System.out.println(Utils.toList(drawnNumbers));
+			System.out.println();
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				String row1 = line;
+				String row2 = scanner.nextLine().trim();
+				String row3 = scanner.nextLine().trim();
+				String row4 = scanner.nextLine().trim();
+				String row5 = scanner.nextLine().trim();
+				BingoBoard bb = new BingoBoard();
+				bb.init(row1, row2, row3, row4, row5);
+				bbs.add(bb);
+				System.out.println(bb.toString());
+			}
+			
+			BingoBoard lastBoard = null;
+			int lastDrawnNumber = 0;
+			outer:
+			for (int drawnNumber:drawnNumbers) {
+				System.out.println("----------- " + drawnNumber + " ----------------");
+				for(Iterator<BingoBoard> iter=bbs.iterator(); iter.hasNext();) {
+					BingoBoard bb = iter.next();
+					bb.drawn(drawnNumber);
+					if (bb.hasWon()) {
+						lastBoard = bb;
+						lastDrawnNumber = drawnNumber;
+						iter.remove();
+					}
+				}
+			}
+			System.out.println(lastBoard);
+			int boardScore = lastBoard.calcSumUnhit();
+			int result = boardScore*lastDrawnNumber;
+			System.out.println("boardScore: "+boardScore);
+			System.out.println("result: "+result);
+			System.out.println();
+		}
+	}
+
 
 
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
