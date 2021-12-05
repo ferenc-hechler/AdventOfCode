@@ -43,7 +43,16 @@ public class Y21Day05 {
 				}
 			}
 			else {
-				// throw new RuntimeException("unsuported HVLine "+toString());
+				int dx = (int) Math.signum(to.x-from.x);
+				int dy = (int) Math.signum(to.y-from.y);
+				Point pos = new Point(from);
+				while (true) {
+					result.add(pos);
+					if (pos.equals(to)) {
+						break;
+					}
+					pos = new Point(pos.x+dx, pos.y+dy);
+				}
 			}
 			return result;
 		}
@@ -95,9 +104,52 @@ public class Y21Day05 {
 		}
 	}
 
+	public static void mainPart2() throws FileNotFoundException {
+		int maxX = 0; 
+		int maxY = 0;
+		List<HVLine> hvLines = new ArrayList<>();
+		try (Scanner scanner = new Scanner(new File("input/y21/day05.txt"))) {
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX+"'");
+				}
+				int x1 = Integer.parseInt(line.replaceFirst(INPUT_RX, "$1"));
+				int y1 = Integer.parseInt(line.replaceFirst(INPUT_RX, "$2"));
+				int x2 = Integer.parseInt(line.replaceFirst(INPUT_RX, "$3"));
+				int y2 = Integer.parseInt(line.replaceFirst(INPUT_RX, "$4"));
+				maxX = Math.max(Math.max(maxX, x1),x2);
+				maxY = Math.max(Math.max(maxY, y1),y2);
+				Point from = new Point(x1, y1);
+				Point to = new Point(x2, y2);
+				HVLine hvLine = new HVLine(from, to);
+				hvLines.add(hvLine);
+				System.out.println(hvLine);
+			}
+			final int[][] matrix = new int[maxY+1][maxX+1];
+			hvLines.forEach(hvLine -> hvLine.generateLinePoints().forEach(p -> matrix[p.y][p.x]++));
+			System.out.println();
+			System.out.println(Utils.toString(matrix));
+			System.out.println();
+			int sumMin2 = 0;
+			for (int[] row:matrix) {
+				for (int n:row) {
+					if (n>=2) {
+						sumMin2++;
+					}
+				}
+			}
+			System.out.println("#2+="+sumMin2);
+		}
+	}
+
+
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
