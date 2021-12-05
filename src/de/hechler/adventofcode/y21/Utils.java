@@ -2,6 +2,7 @@ package de.hechler.adventofcode.y21;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -83,6 +84,23 @@ public class Utils {
 			result = "                             ".substring(0, len-result.length())+result;
 		}
 		return result;
+	}
+
+	public static String toString(int[][] intMatrix) {
+		int maxLen = 1;
+		for (int[] row: intMatrix) {
+			for (int n:row) {
+				maxLen = Math.max(maxLen, Integer.toString(n).length());
+			}
+		}
+		StringBuilder result = new StringBuilder();
+		for (int[] row: intMatrix) {
+			for (int n: row) {
+				result.append(toFixString(n, maxLen)).append(" ");
+			}
+			result.append("\n");
+		}
+		return result.toString();
 	}
 	
 	

@@ -97,6 +97,7 @@ public class Y21Day03 {
 				}
 				scanResult.add(binNum);
 			}
+			System.out.println(Utils.toList(sumOnes));
 			System.out.println("#scans: "+scanResult.size());
 			String oxygeneGeneratorRating = searchOxygeneRating(scanResult, 0, sumZeros, sumOnes);
 			System.out.println("oxygeneGeneratorRating: "+oxygeneGeneratorRating);
