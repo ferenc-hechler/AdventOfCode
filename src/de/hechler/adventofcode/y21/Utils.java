@@ -36,6 +36,20 @@ public class Utils {
 		return result;
 	}
 	
+	public static List<Long> toList(long[] array) {
+		if (array==null) {
+			return null;
+		}
+		if (array.length == 0) {
+			return Collections.emptyList();
+		}
+		List<Long> result = new ArrayList<Long>();
+		for (long n:array) {
+			result.add(n);
+		}
+		return result;
+	}
+	
 	public interface ConvertFunction<S,D>  {
 		public D convert(S source);
 	}
@@ -101,6 +115,14 @@ public class Utils {
 			result.append("\n");
 		}
 		return result.toString();
+	}
+
+	public static long sum(long[] values) {
+		long result = 0;
+		for (long value:values) {
+			result += value;
+		}
+		return result;
 	}
 	
 	
