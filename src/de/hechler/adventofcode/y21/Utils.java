@@ -124,6 +124,32 @@ public class Utils {
 		}
 		return result;
 	}
+
+	public static int min(List<Integer> crabPositions) {
+		Integer result = crabPositions.stream().min(Integer::compare).get();
+		return result;
+	}
+	
+	public static int max(List<Integer> crabPositions) {
+		Integer result = crabPositions.stream().max(Integer::compare).get();
+		return result;
+	}
+
+	public static int min(int[] values) {
+		int result = Integer.MAX_VALUE;
+		for (int value:values) {
+			result = Math.min(value, result);
+		}
+		return result;
+	}
+	
+	public static int max(int[] values) {
+		int result = Integer.MIN_VALUE;
+		for (int value:values) {
+			result = Math.max(value, result);
+		}
+		return result;
+	}
 	
 	
 }
