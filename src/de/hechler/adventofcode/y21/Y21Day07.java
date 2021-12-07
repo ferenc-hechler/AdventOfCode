@@ -40,8 +40,35 @@ public class Y21Day07 {
 			System.out.println("minimum cost: "+result);
 		}
 	}
+
+	/**
+	 * sum(1..n) = n(n+1)/2
+	 * 
+	 * @throws FileNotFoundException
+	 */
+	public static void mainPart2() throws FileNotFoundException {
+		try (Scanner scanner = new Scanner(new File("input/y21/day07.txt"))) {
+			List<Integer> crabPositions = Utils.toList(scanner.nextLine().split("\\s*,\\s*")).stream().map(Integer::parseInt).collect(Collectors.toList());
+			System.out.println(crabPositions);
+			int minPos = Utils.min(crabPositions);
+			int maxPos = Utils.max(crabPositions);
+			int[] cost = new int[maxPos+1];
+
+			for (int crabPosition:crabPositions) {
+				for (int pos=minPos; pos<=maxPos; pos++) {
+					int n = Math.abs(pos-crabPosition);
+					cost[pos] += n*(n+1)/2;
+				}
+			}
+			System.out.println(Utils.toList(cost));
+			int result = Utils.min(cost);
+			System.out.println("minimum cost: "+result);
+		}
+	}
+
+	
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
