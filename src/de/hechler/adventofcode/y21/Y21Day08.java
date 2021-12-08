@@ -60,9 +60,7 @@ public class Y21Day08 {
 	
 	private final static int MASK_ALL = D_A + D_B + D_C + D_D + D_E + D_F + D_G;
 	
-	private final static int[] DS = {D_A, D_B, D_C, D_D, D_E, D_F, D_G};
 	private final static int[] MASKS = {N_0, N_1, N_2, N_3, N_4, N_5, N_6, N_7, N_8, N_9};
-	private final static int[] BITS = {6, 2, 5, 5, 4, 5, 6, 3, 7, 6};
 	private final static int[][] NUMS_BY_SIZE = {{}, {}, {1}, {7}, {4}, {2, 3, 5}, {0, 6, 9}, {8}};
 	
 	private final static String INPUT_RX = "([a-g ]+)[|]([a-g ]+)";
@@ -92,18 +90,20 @@ public class Y21Day08 {
 		}
 	}
 
-	
+	/**
+	 * A Segment is one of the 7 segments in the display.
+	 * It is not known, which of the 7 it is at the beginning.
+	 * So, the segments begins with a possible MASK for all 7 positions.
+	 * Over time there will be restrictions on the segments,
+	 * so it can be sharepened, which position it is, until it is
+	 * clear which exact position it is. 
+	 * which reduce   
+	 */
 	private static class Segment {
+		/** superposition of all posible assignments */
 		private int mask;
-		public Segment() {
-			mask = MASK_ALL; 
-		}
-		public int getMask() {
-			return mask;
-		}
-		public boolean isUnique() {
-			return Integer.bitCount(mask) == 1;
-		}
+		public Segment() { mask = MASK_ALL; }
+		public int getMask() { return mask; }
 		public boolean restrict(int restrictMask) {
 			int oldMask = mask;
 			mask = mask & restrictMask;
@@ -114,12 +114,14 @@ public class Y21Day08 {
 			mask = mask & ~maskToRemove;
 			return oldMask != mask;
 		}
-		@Override
-		public String toString() {
-			return Integer.toBinaryString(mask);
-		}
+		@Override public String toString() { return Integer.toBinaryString(mask); }
 	}
 	
+	/**
+	 * calculate mask which contains all segments.
+	 * @param segments
+	 * @return the union of all masks in the list of segments.
+	 */
 	private static int unionMask(List<Segment> segments) {
 		int result = 0;
 		for (Segment segment:segments) {
@@ -129,21 +131,13 @@ public class Y21Day08 {
 	}
 
 
-	private static List<List<Segment>> getCompleteSubgroups(List<Segment> segments) {
-		List<List<Segment>> result = new ArrayList<>();
-		List<List<Segment>> allSubsets = Utils.createSubsets(segments);
-		for (List<Segment> subset:allSubsets) {
-			if (subset.isEmpty()) {
-				continue;
-			}
-			int uMask = unionMask(subset);
-			if (Integer.bitCount(uMask) == subset.size()) {
-				result.add(subset);
-			}
-		}
-		return result;
-	}
-	
+	/**
+	 * DigiNum is a number which is setup of a list of segments.
+	 * From the beginning it is not clear, which segment represents which position.
+	 * 
+	 * The Segment instances are shared between all digits which build one set of input.
+	 * So changes in a segment in digit1 will have impact on the same segment in digit2.
+	 */
 	private static class DigiNum {
 		private List<Segment> segments;
 		public DigiNum() {
@@ -171,6 +165,14 @@ public class Y21Day08 {
 			}
 			return result;
 		}
+		/**
+		 * This digit was identified to be the given parameter n.
+		 * Based on this knwoledge, the mask of all cotained segments can be restricted 
+		 * to the mask of the detected number (MASKS[n]).
+		 *   
+		 * @param n
+		 * @return true, if there were any changes in the segments. This is used to detect, when the inference is finished.
+		 */
 		public boolean restrict(int n) {
 			boolean changed = false;
 			for (Segment segment:segments) {
@@ -180,30 +182,49 @@ public class Y21Day08 {
 			return changed;
 		}
 		/**
-		 * iterate over all subsets of the segments (except trivial empty set and complete set).
-		 * check if union of all possible mask from this group has exactly the number of bits of the group size.
-		 * this means, these bits can not be part of the remaining segments. 
-		 * Remove these masks from the remaining segments.  
-		 * @return true, if there were changes
+		 * Iterate over all complete subgroups of segments.
+		 * The union mask of a subgroup can not be part of any other segment outside the subgroup.
+		 * So, remove the mask from all other segments.
+		 * 
+		 * @return true, if there were changes (detect progress).
 		 */
 		public boolean restrictMasks() {
 			boolean changed = false;
-			List<List<Segment>> subSetsSegments = Utils.createSubsets(segments); 
-			for (List<Segment> subSetSegments:subSetsSegments) {
-				int allOr = 0;
-				for (Segment segment:subSetSegments) {
-					allOr |= segment.getMask();
-				}
-				if (Integer.bitCount(allOr) == subSetSegments.size()) {
-					Set<Segment> remaining = new HashSet<>(segments);
-					remaining.removeAll(subSetSegments);
-					for (Segment segment:remaining) {
-						boolean changes = segment.removeMask(allOr);
-						changed = changed || changes;
-					}
+			List<List<Segment>> completeSubgroups = getCompleteSubgroups(segments); 
+			for (List<Segment> completeSubgroup:completeSubgroups) {
+				int subgroupMask = unionMask(completeSubgroup);
+				Set<Segment> remaining = new HashSet<>(segments);
+				remaining.removeAll(completeSubgroup);
+				for (Segment segment:remaining) {
+					boolean changes = segment.removeMask(subgroupMask);
+					changed = changed || changes;
 				}
 			}
 			return changed;
+		}
+		/**
+		 * Calculate the list of all complete subgroups.
+		 * A complete subgroup is a group of segments, 
+		 * whose union mask has the same cardinality as the subgroup itself.
+		 * This means, each segment is assigned to one of the positions in the union mask and 
+		 * the union mask is completely filled with the segments from this subgroup. 
+		 * 
+		 * @param segments
+		 * @return
+		 */
+		private List<List<Segment>> getCompleteSubgroups(List<Segment> segments) {
+			List<List<Segment>> result = new ArrayList<>();
+			List<List<Segment>> allSubsets = Utils.createSubsets(segments);
+			for (List<Segment> subset:allSubsets) {
+				if (subset.isEmpty()) {
+					continue;
+				}
+				int uMask = unionMask(subset);
+				if (Integer.bitCount(uMask) == subset.size()) {
+					result.add(subset);
+				}
+			}
+			return result;
 		}
 		@Override
 		public String toString() {
@@ -211,8 +232,7 @@ public class Y21Day08 {
 		}
 	}
 	
-	
-	
+
 	public static void mainPart2() throws FileNotFoundException {
 		try (Scanner scanner = new Scanner(new File("input/y21/day08.txt"))) {
 			int sumCodes = 0;
@@ -230,10 +250,17 @@ public class Y21Day08 {
 				allInput.addAll(output);
 				System.out.println("---------------");
 				System.out.println(allInput);
+				
+				// create a new set of sequences for the letters "a".."g"
 				Map<Character, Segment> segments = new HashMap<>();
 				for (char c='a'; c<='g'; c++) {
 					segments.put(c, new Segment());
 				}
+				
+				// for each input code like "acfg" create a digit
+				// not only the left, but also the right side from "|". 
+				// All digits share the same segment instances, 
+				// so "c" in the digit "acf" is the same instance as "c" in the digit "cf".
 				List<DigiNum> digits = new ArrayList<>();
 				for (String inp:allInput) {
 					DigiNum digi = new DigiNum();
@@ -242,6 +269,8 @@ public class Y21Day08 {
 					});
 					digits.add(digi);
 				}
+				
+				// inference until there are no more changes
 				boolean changed = true;
 				while (changed) {
 					changed = false;
@@ -256,10 +285,12 @@ public class Y21Day08 {
 					}
 					System.out.println(digits);
 				}
+				
 				System.out.println("FINAL:");
 				System.out.println(digits);
 				System.out.println(segments);
 
+				// translate code for the output
 				int code = 0;
 				for (String out:output) {
 					DigiNum digi = new DigiNum();
@@ -275,7 +306,7 @@ public class Y21Day08 {
 				System.out.println("CODE: "+code);
 				sumCodes += code;
 			}
-			System.out.println("SUM of all codes: "+sumCodes);
+			System.out.println("SUM of all codes: "+sumCodes); // SUM of all codes: 1091609
 		}
 	}
 
