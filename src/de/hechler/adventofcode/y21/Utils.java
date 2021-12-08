@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class Utils {
 
@@ -150,6 +151,32 @@ public class Utils {
 		}
 		return result;
 	}
+
+	/**
+	 * create all subsets of the given set.
+	 * from: https://java2blog.com/find-subsets-set-power-set/
+	 * @param <T>
+	 * @param completeSet
+	 * @return
+	 */
+	public static <T> List<List<T>> createSubsets(List<T> completeSet) {
+		List<List<T>> result = new ArrayList<>();
+        subsetsHelper(result, new ArrayList<>(), completeSet, 0);
+		return result;
+	}
+	
+	
+    private static <T> void subsetsHelper(List<List<T>> list , List<T> resultList, List<T> ts, int start){
+        list.add(new ArrayList<>(resultList));
+        for(int i = start; i < ts.size(); i++){
+           // add element
+            resultList.add(ts.get(i));
+           // Explore
+            subsetsHelper(list, resultList, ts, i + 1);
+           // remove
+            resultList.remove(resultList.size() - 1);
+        }
+    }
 	
 	
 }
