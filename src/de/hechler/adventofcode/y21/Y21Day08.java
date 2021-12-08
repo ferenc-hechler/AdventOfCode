@@ -3,6 +3,7 @@ package de.hechler.adventofcode.y21;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -119,6 +120,30 @@ public class Y21Day08 {
 		}
 	}
 	
+	private static int unionMask(List<Segment> segments) {
+		int result = 0;
+		for (Segment segment:segments) {
+			result |= segment.getMask();
+		}
+		return result;
+	}
+
+
+	private static List<List<Segment>> getCompleteSubgroups(List<Segment> segments) {
+		List<List<Segment>> result = new ArrayList<>();
+		List<List<Segment>> allSubsets = Utils.createSubsets(segments);
+		for (List<Segment> subset:allSubsets) {
+			if (subset.isEmpty()) {
+				continue;
+			}
+			int uMask = unionMask(subset);
+			if (Integer.bitCount(uMask) == subset.size()) {
+				result.add(subset);
+			}
+		}
+		return result;
+	}
+	
 	private static class DigiNum {
 		private List<Segment> segments;
 		public DigiNum() {
@@ -129,12 +154,18 @@ public class Y21Day08 {
 		}
 		public List<Integer> getPossibleNumbers() {
 			List<Integer> result = new ArrayList<>();
-			int allOr = 0;
-			for (Segment segment:segments) {
-				allOr |= segment.getMask();
-			}
+			int allOr = unionMask(segments);
 			for (int n:NUMS_BY_SIZE[segments.size()]) {
-				if ((MASKS[n] & allOr) == MASKS[n]) {
+				boolean ok = (MASKS[n] & allOr) == MASKS[n];
+				if (ok) {
+					// all complete subgroups must be completely contained in the digit mask
+					List<List<Segment>> completeSubgroups = getCompleteSubgroups(segments);
+					for (List<Segment> subgroup:completeSubgroups) {
+						int subgroupMask = unionMask(subgroup);
+						ok = ok && ((subgroupMask & MASKS[n]) == subgroupMask);
+					}
+				}
+				if (ok) {
 					result.add(n);
 				}
 			}
@@ -183,7 +214,8 @@ public class Y21Day08 {
 	
 	
 	public static void mainPart2() throws FileNotFoundException {
-		try (Scanner scanner = new Scanner(new File("input/y21/day08simple.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day08.txt"))) {
+			int sumCodes = 0;
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
 				if (line.isEmpty()) {
@@ -227,7 +259,23 @@ public class Y21Day08 {
 				System.out.println("FINAL:");
 				System.out.println(digits);
 				System.out.println(segments);
+
+				int code = 0;
+				for (String out:output) {
+					DigiNum digi = new DigiNum();
+					out.chars().forEach(c -> {
+						digi.addSegment(segments.get((char)c));
+					});
+					List<Integer> codeN = digi.getPossibleNumbers();
+					if (codeN.size()!=1) {
+						throw new RuntimeException("none unique code detected "+digi);
+					}
+					code = code*10 + codeN.get(0);
+				}
+				System.out.println("CODE: "+code);
+				sumCodes += code;
 			}
+			System.out.println("SUM of all codes: "+sumCodes);
 		}
 	}
 
