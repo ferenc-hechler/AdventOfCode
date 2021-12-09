@@ -2,10 +2,8 @@ package de.hechler.adventofcode.y21;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public class Utils {
 
@@ -51,10 +49,60 @@ public class Utils {
 		return result;
 	}
 	
+	public static int[] toIntArray(char[] cArr) {
+		if (cArr==null) {
+			return null;
+		}
+		int[] result = new int[cArr.length];
+		for (int i=0; i<cArr.length; i++) {
+			result[i] = (int)cArr[i];
+		}
+		return result;
+	}
+
+	public static int[] toIntArray(List<Integer> iArr) {
+		if (iArr==null) {
+			return null;
+		}
+		int[] result = new int[iArr.size()];
+		for (int i=0; i<iArr.size(); i++) {
+			result[i] = iArr.get(i);
+		}
+		return result;
+	}
+
+	public static int[][] toIntMatrix(List<List<Integer>> matrix) {
+		if (matrix==null) {
+			return null;
+		}
+		int rows = matrix.size();
+		if (rows == 0) {
+			return new int[0][0];
+		}
+		int cols = matrix.get(0).size();
+		int[][] result = new int[rows][cols];
+		for (int r=0; r<rows; r++) {
+			result[r] = toIntArray(matrix.get(r));
+		}
+		return result;
+	}
+	
+	public static List<List<Integer>> toList(int[][] matrix) {
+		if (matrix==null) {
+			return null;
+		}
+		List<List<Integer>> result = new ArrayList<>();
+		for (int row=0; row<matrix.length; row++) {
+			result.add(toList(matrix[row]));
+		}
+		return result;
+	}
+	
 	public interface ConvertFunction<S,D>  {
 		public D convert(S source);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <S,D> D[] mapArray(S[] source, ConvertFunction<S,D> conv) {
 		
 		if (source==null) {
@@ -126,8 +174,8 @@ public class Utils {
 		return result;
 	}
 
-	public static int min(List<Integer> crabPositions) {
-		Integer result = crabPositions.stream().min(Integer::compare).get();
+	public static int min(List<Integer> values) {
+		Integer result = values.stream().min(Integer::compare).get();
 		return result;
 	}
 	

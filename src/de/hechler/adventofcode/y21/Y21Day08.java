@@ -167,13 +167,13 @@ public class Y21Day08 {
 		}
 		/**
 		 * This digit was identified to be the given parameter n.
-		 * Based on this knwoledge, the mask of all cotained segments can be restricted 
+		 * Based on this knwoledge, the mask of all contained segments can be restricted 
 		 * to the mask of the detected number (MASKS[n]).
 		 *   
 		 * @param n
 		 * @return true, if there were any changes in the segments. This is used to detect, when the inference is finished.
 		 */
-		public boolean restrict(int n) {
+		public boolean restrictToIdentifiedNumber(int n) {
 			boolean changed = false;
 			for (Segment segment:segments) {
 				boolean changes = segment.restrict(MASKS[n]);
@@ -277,7 +277,7 @@ public class Y21Day08 {
 					for (DigiNum digi:digits) {
 						List<Integer> possibileNums = digi.getPossibleNumbers();
 						if (possibileNums.size() == 1) {
-							boolean changes = digi.restrict(possibileNums.get(0));
+							boolean changes = digi.restrictToIdentifiedNumber(possibileNums.get(0));
 							changed = changed || changes;
 						}
 						boolean changes = digi.restrictMasks();
