@@ -4,8 +4,12 @@ import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -73,7 +77,23 @@ public class Y21Day09 {
 			boolean changed = false;
 			for (int r=0; r<rows; r++) {
 				for (int c=0; c<cols; c++) {
-					
+					if (getHeight(r, c) > h) {
+						continue;
+					}
+					int basin = getFlood(r, c);
+					if ((basin != 0) || ignoreBasins.contains(basin)) {
+						continue;
+					}
+					Set<Integer> neighbourBasins = getNeighbourBasins(r, c);
+					if (neighbourBasins.isEmpty()) {
+						continue;
+					}
+					int newBasin = neighbourBasins.iterator().next();
+					if (ignoreBasins.contains(newBasin)) {
+						continue;
+					}
+					flood[r][c] = newBasin; 
+					changed = true;
 				}
 			}
 			return changed;
@@ -133,6 +153,13 @@ public class Y21Day09 {
 			return nextFlood[r][c];
 		}
 		
+		private int getFlood(int r, int c) {
+			if (!isValidPosition(r,c)) {
+				return 0;
+			}
+			return flood[r][c];
+		}
+		
 		/**
 		 * @return defaultValue if row, col is out of range.
 		 */
@@ -165,6 +192,37 @@ public class Y21Day09 {
 			}
 			return result.toString();
 		}
+		public String toFlood() {
+			StringBuilder result = new StringBuilder();
+			for (int row=0; row<rows; row++) {
+				for (int col=0; col<cols; col++) {
+					String f = ".";
+					int basin = getFlood(row, col);
+					if (basin != 0) {
+						f = Integer.toString(basin);
+					}
+					result.append(f);
+				}
+				result.append("\n");
+			}
+			return result.toString();
+		}
+		public Map<Integer, Integer> collectBasinSizes() {
+			Map<Integer, Integer> result = new HashMap<>();
+			for (int row=0; row<rows; row++) {
+				for (int col=0; col<cols; col++) {
+					int basin = getFlood(row, col);
+					if (basin != 0) {
+						Integer sum = result.get(basin);
+						if (sum == null) {
+							sum = 0;
+						}
+						result.put(basin, sum+1);
+					}
+				}
+			}
+			return result;
+		}
 	}
 	
 	
@@ -195,7 +253,7 @@ public class Y21Day09 {
 	}
 
 	public static void mainPart2() throws FileNotFoundException {
-		try (Scanner scanner = new Scanner(new File("input/y21/day09example.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day09.txt"))) {
 			List<List<Integer>> inputNumbers = new ArrayList<>();
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
@@ -214,14 +272,20 @@ public class Y21Day09 {
 			System.out.println(minima);
 			floor.initFlood(minima);
 			System.out.println(floor.toNextFlood());
+			Set<Integer> finishedBasins = new HashSet<>();
 			for (int h=1; h<9; h++) {
 				System.out.println("----- flooding "+h+" -----");
-				Set<Integer> finishedBasins = new HashSet<>();
 				floor.flood(h, finishedBasins);
-				System.out.println(floor.toNextFlood());
+				System.out.println(floor.toFlood());
 				System.out.println("FINISHED: " + finishedBasins);
 			}
 			
+			Map<Integer, Integer> basinSizes = floor.collectBasinSizes();
+			System.out.println(basinSizes);
+			List<Integer> bSizes = new ArrayList<>(basinSizes.values());
+			Collections.sort(bSizes, (s1,s2)-> Integer.compare(s2, s1));
+			System.out.println(bSizes);
+			System.out.println("3 Biggest: " + (bSizes.get(0)*bSizes.get(1)*bSizes.get(2)));
 		}
 	}
 
