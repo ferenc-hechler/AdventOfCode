@@ -1,39 +1,41 @@
 package de.hechler.adventofcode.y21;
 
-import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 /**
- * see: https://adventofcode.com/2021/day/9
+ * see: https://adventofcode.com/2021/day/10
  *
  */
 public class Y21Day10 {
 
 	private final static String INPUT_RX = "^([()\\[\\]{}<>]+)$";
 	
+	private final static Map<Character, Character> open2closeMap = Map.of(
+            '(', ')',
+            '[', ']',
+            '{', '}',
+            '<', '>');
+	private final static Map<Character, Integer> errorValuesMap = Map.of(
+            ')', 3,
+            ']', 57,
+            '}', 1197,
+            '>', 25137);
+	private final static Map<Character, Long> closingValuesMap = Map.of(
+			')', 1L,
+			']', 2L,
+			'}', 3L,
+			'>', 4L);
+
 	
 	public static void mainPart1() throws FileNotFoundException {
 		
-		Map<Character, Character> open2closeMap = new HashMap<>();
-		open2closeMap.put('(', ')');
-		open2closeMap.put('[', ']');
-		open2closeMap.put('{', '}');
-		open2closeMap.put('<', '>');
-		Map<Character, Integer> errorValue = new HashMap<>();
-		errorValue.put(')', 3);
-		errorValue.put(']', 57);
-		errorValue.put('}', 1197);
-		errorValue.put('>', 25137);
-
 		try (Scanner scanner = new Scanner(new File("input/y21/day10.txt"))) {
 			int sumError = 0;
 			while (scanner.hasNext()) {
@@ -56,7 +58,7 @@ public class Y21Day10 {
 					else {
 						char expectedClosingCharacter = expectedClosingCharacters.pop();
 						if (expectedClosingCharacter != c) {
-							int error = errorValue.get(c);
+							int error = errorValuesMap.get(c);
 							sumError += error;
 							System.out.println("expected '"+expectedClosingCharacter+"' at position "+i+", but found '"+c+"': " + error+ " Points");
 						}
@@ -69,22 +71,6 @@ public class Y21Day10 {
 
 	public static void mainPart2() throws FileNotFoundException {
 		
-		Map<Character, Character> open2closeMap = new HashMap<>();
-		open2closeMap.put('(', ')');
-		open2closeMap.put('[', ']');
-		open2closeMap.put('{', '}');
-		open2closeMap.put('<', '>');
-		Map<Character, Long> errorValue = new HashMap<>();
-		errorValue.put(')', 3L);
-		errorValue.put(']', 57L);
-		errorValue.put('}', 1197L);
-		errorValue.put('>', 25137L);
-		Map<Character, Long> closingValue = new HashMap<>();
-		closingValue.put(')', 1L);
-		closingValue.put(']', 2L);
-		closingValue.put('}', 3L);
-		closingValue.put('>', 4L);
-
 		List<Long> closingCosts = new ArrayList<>();
 		
 		try (Scanner scanner = new Scanner(new File("input/y21/day10.txt"))) {
@@ -109,7 +95,7 @@ public class Y21Day10 {
 					else {
 						char expectedClosingCharacter = expectedClosingCharacters.pop();
 						if (expectedClosingCharacter != c) {
-							error = errorValue.get(c);
+							error = errorValuesMap.get(c);
 							break;
 						}
 					}
@@ -118,7 +104,7 @@ public class Y21Day10 {
 					long closingCost = 0;
 					char c = expectedClosingCharacters.pop();
 					while (c != '~') {
-						closingCost = 5*closingCost + closingValue.get(c);
+						closingCost = 5*closingCost + closingValuesMap.get(c);
 						c = expectedClosingCharacters.pop();
 					}
 					closingCosts.add(closingCost);
