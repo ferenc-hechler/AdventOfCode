@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,10 +67,71 @@ public class Y21Day10 {
 		}
 	}
 
+	public static void mainPart2() throws FileNotFoundException {
+		
+		Map<Character, Character> open2closeMap = new HashMap<>();
+		open2closeMap.put('(', ')');
+		open2closeMap.put('[', ']');
+		open2closeMap.put('{', '}');
+		open2closeMap.put('<', '>');
+		Map<Character, Long> errorValue = new HashMap<>();
+		errorValue.put(')', 3L);
+		errorValue.put(']', 57L);
+		errorValue.put('}', 1197L);
+		errorValue.put('>', 25137L);
+		Map<Character, Long> closingValue = new HashMap<>();
+		closingValue.put(')', 1L);
+		closingValue.put(']', 2L);
+		closingValue.put('}', 3L);
+		closingValue.put('>', 4L);
+
+		List<Long> closingCosts = new ArrayList<>();
+		
+		try (Scanner scanner = new Scanner(new File("input/y21/day10.txt"))) {
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX+"'");
+				}
+				System.out.println(line);
+				Stack<Character> expectedClosingCharacters = new Stack<>();
+				expectedClosingCharacters.add('~');
+				long error = 0;
+				for (int i=0; i<line.length(); i++) {
+					char c = line.charAt(i);
+					Character closingCharacter = open2closeMap.get(c);
+					if (closingCharacter != null) {
+						expectedClosingCharacters.push(closingCharacter);
+					}
+					else {
+						char expectedClosingCharacter = expectedClosingCharacters.pop();
+						if (expectedClosingCharacter != c) {
+							error = errorValue.get(c);
+							break;
+						}
+					}
+				}
+				if (error == 0) {
+					long closingCost = 0;
+					char c = expectedClosingCharacters.pop();
+					while (c != '~') {
+						closingCost = 5*closingCost + closingValue.get(c);
+						c = expectedClosingCharacters.pop();
+					}
+					closingCosts.add(closingCost);
+				}
+			}
+			Collections.sort(closingCosts);
+			System.out.println("median ClosingCost: "+closingCosts.get(closingCosts.size()/2));
+		}
+	}
 
 	
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
