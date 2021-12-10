@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * see: https://adventofcode.com/2021/day/10
@@ -86,32 +87,27 @@ public class Y21Day10 {
 				Stack<Character> expectedClosingCharacters = new Stack<>();
 				expectedClosingCharacters.add('~');
 				long error = 0;
-				for (int i=0; i<line.length(); i++) {
-					char c = line.charAt(i);
+				for (char c:line.toCharArray()) {
 					Character closingCharacter = open2closeMap.get(c);
 					if (closingCharacter != null) {
 						expectedClosingCharacters.push(closingCharacter);
 					}
-					else {
-						char expectedClosingCharacter = expectedClosingCharacters.pop();
-						if (expectedClosingCharacter != c) {
-							error = errorValuesMap.get(c);
-							break;
-						}
+					else if (expectedClosingCharacters.pop() != c) {
+						error = errorValuesMap.get(c);
+						break;
 					}
 				}
 				if (error == 0) {
-					long closingCost = 0;
-					char c = expectedClosingCharacters.pop();
-					while (c != '~') {
-						closingCost = 5*closingCost + closingValuesMap.get(c);
-						c = expectedClosingCharacters.pop();
-					}
+					Collections.reverse(expectedClosingCharacters);
+					long closingCost = expectedClosingCharacters.stream()
+							.filter(c -> c!='~')
+							.map(c -> closingValuesMap.get(c))
+							.reduce(0L, (sum, cost) -> sum*5L+cost);
+					System.out.println(closingCost);
 					closingCosts.add(closingCost);
 				}
 			}
-			Collections.sort(closingCosts);
-			System.out.println("median ClosingCost: "+closingCosts.get(closingCosts.size()/2));
+			System.out.println("median ClosingCost: "+Utils.median(closingCosts));
 		}
 	}
 

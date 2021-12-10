@@ -174,6 +174,15 @@ public class Utils {
 		return result;
 	}
 
+	public static Long median(List<Long> values) {
+		if ((values == null) || values.isEmpty()) {
+			return null;
+		}
+		List<Long> sortedList = new ArrayList<>(values);
+		Collections.sort(sortedList);
+		return sortedList.get(sortedList.size()/2);
+	}
+
 	public static int min(List<Integer> values) {
 		Integer result = values.stream().min(Integer::compare).get();
 		return result;
@@ -225,6 +234,5 @@ public class Utils {
             resultList.remove(resultList.size() - 1);
         }
     }
-	
 	
 }
