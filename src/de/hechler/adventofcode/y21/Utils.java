@@ -150,6 +150,10 @@ public class Utils {
 	}
 
 	public static String toString(int[][] intMatrix) {
+		return toString(intMatrix, " ");
+	}
+
+	public static String toString(int[][] intMatrix, String seperator) {
 		int maxLen = 1;
 		for (int[] row: intMatrix) {
 			for (int n:row) {
@@ -158,8 +162,10 @@ public class Utils {
 		}
 		StringBuilder result = new StringBuilder();
 		for (int[] row: intMatrix) {
+			String sep = "";
 			for (int n: row) {
-				result.append(toFixString(n, maxLen)).append(" ");
+				result.append(sep).append(toFixString(n, maxLen));
+				sep = seperator;
 			}
 			result.append("\n");
 		}
@@ -173,6 +179,32 @@ public class Utils {
 		}
 		return result;
 	}
+	
+	public static long sum(long[][] matrix) {
+		long result = 0;
+		for (long[] row:matrix) {
+			result += sum(row);
+		}
+		return result;
+	}
+
+	public static long sum(int[] values) {
+		int result = 0;
+		for (int value:values) {
+			result += value;
+		}
+		return result;
+	}
+	
+	public static int sum(int[][] matrix) {
+		int result = 0;
+		for (int[] row:matrix) {
+			result += sum(row);
+		}
+		return result;
+	}
+	
+
 
 	public static Long median(List<Long> values) {
 		if ((values == null) || values.isEmpty()) {
@@ -234,5 +266,5 @@ public class Utils {
             resultList.remove(resultList.size() - 1);
         }
     }
-	
+
 }
