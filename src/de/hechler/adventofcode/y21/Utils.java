@@ -7,6 +7,30 @@ import java.util.List;
 
 public class Utils {
 
+	public static class Counter {
+		private int count;
+		public Counter() { this(0); }
+		public Counter(int count) { this.count = count; }
+		public int inc() { return inc(1); }
+		public int inc(int n) { count += n; return count; }
+		public int dec() { return dec(1); }
+		public int dec(int n) { count -= n; return count; }
+		public int get() { return count; }
+		public void set(int value) { count = value; }
+	}
+	
+	public static class LongCounter {
+		private long count;
+		public LongCounter() { this(0); }
+		public LongCounter(long count) { this.count = count; }
+		public long inc() { return inc(1); }
+		public long inc(long n) { count += n; return count; }
+		public long dec() { return dec(1); }
+		public long dec(long n) { count -= n; return count; }
+		public long get() { return count; }
+		public void set(long value) { count = value; }
+	}
+	
 	public static <T> List<T> toList(T[] array) {
 		if (array==null) {
 			return null;
@@ -266,5 +290,13 @@ public class Utils {
             resultList.remove(resultList.size() - 1);
         }
     }
+
+	public static boolean checkRange(int value, int minValue, int maxValue) {
+		return (minValue <= value) && (value <= maxValue);
+	}
+
+	public static boolean checkRange(long value, long minValue, long maxValue) {
+		return (minValue <= value) && (value <= maxValue);
+	}
 
 }

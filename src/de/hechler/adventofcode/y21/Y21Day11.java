@@ -13,11 +13,12 @@ public class Y21Day11 {
 	private final static String INPUT_RX = "^([0-9]{10})$";
 	
 	private static class OctopusField {
+		private static interface OFVisitor { public void visit(int row, int col, int value); }
 		private int[][] energy;
 		private int countFlashes;
 		public OctopusField() {
-			countFlashes = 0;
 			energy = new int[10][10];
+			countFlashes = 0;
 		}
 		public void setRow(int row, String numString) {
 			for (int col=0; col<numString.length(); col++) {
@@ -25,20 +26,15 @@ public class Y21Day11 {
 			}
 		}
 		public void tick() {
-			for (int row=0; row<10; row++ ) {
-				for (int col=0; col<10; col++ ) {
-					addEnergy(row, col);
-				}
-			}
+			forEach((r,c,e)->addEnergy(r,c));
 			resetflashed();
 		}
 		public void addEnergy(int row, int col) {
-			if ((row<0) || (row>9) || (col<0) || (col>9)) {
-				return;
-			}
-			energy[row][col]++;
-			if (energy[row][col] == 10) {
-				flash(row, col);
+			if (Utils.checkRange(row, 0, 9) && Utils.checkRange(col, 0, 9) ) {
+				energy[row][col]++;
+				if (energy[row][col] == 10) {
+					flash(row, col);
+				}
 			}
 		}
 		private void flash(int row, int col) {
@@ -50,19 +46,20 @@ public class Y21Day11 {
 			}
 		}
 		private void resetflashed() {
-			for (int row=0; row<10; row++ ) {
-				for (int col=0; col<10; col++ ) {
-					if (energy[row][col] >= 10) {
-						energy[row][col] = 0;
-					}
-				}
-			}
+			forEach((r, c, e) -> {if (e>=10) energy[r][c] = 0;});
 		}
 		private boolean isEmpty() {
 			return Utils.sum(energy) == 0;
 		}
 		public int getCountFlashes() {
 			return countFlashes;
+		}
+		private void forEach(OFVisitor visitor) {
+			for (int row=0; row<10; row++ ) {
+				for (int col=0; col<10; col++ ) {
+					visitor.visit(row, col, energy[row][col]);
+				}
+			}
 		}
 		@Override
 		public String toString() {
