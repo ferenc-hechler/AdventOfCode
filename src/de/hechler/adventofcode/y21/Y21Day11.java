@@ -95,9 +95,33 @@ public class Y21Day11 {
 		}
 	}
 
+	public static void mainPart2() throws FileNotFoundException {
+		
+		try (Scanner scanner = new Scanner(new File("input/y21/day11.txt"))) {
+			int row = 0;
+			OctopusField octs = new OctopusField();
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX+"'");
+				}
+				octs.setRow(row++, line);
+			}
+			int step = 0;
+			while (!octs.isEmpty()) {
+				step++;
+				octs.tick();
+			}
+			System.out.println("Steps: "+step);
+		}
+	}
+
 	
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
