@@ -29,24 +29,39 @@ public class Y21Day12 {
 			private Set<String> blockedNodes;
 			private List<String> visitedNodes;
 			public Path() {
-				blockedNodes = new HashSet<>();
-				visitedNodes = new ArrayList<String>();
-				visitedNodes.add("start");
-				blockedNodes.add("start");
-				doubleVisitPossible = true;
+				this.blockedNodes = new HashSet<>();
+				this.visitedNodes = new ArrayList<String>();
+				this.visitedNodes.add("start");
+				this.blockedNodes.add("start");
+				this.doubleVisitPossible = true;
 			}
 			public Path(Path parentPath, String nextNode) {
-				blockedNodes = new HashSet<>(parentPath.blockedNodes);
-				visitedNodes = new ArrayList<>(parentPath.visitedNodes);
-				visitedNodes.add(nextNode);
+				this(parentPath, nextNode, parentPath.doubleVisitPossible);
+			}
+			public Path(Path parentPath, String nextNode, boolean doubleVisitPossible) {
+				this.blockedNodes = new HashSet<>(parentPath.blockedNodes);
+				this.visitedNodes = new ArrayList<>(parentPath.visitedNodes);
+				this.visitedNodes.add(nextNode);
 				if (nextNode.matches("^[a-z].*$")) {
-					blockedNodes.add(nextNode);
+					this.blockedNodes.add(nextNode);
 				}
-				doubleVisitPossible = parentPath.doubleVisitPossible;
+				this.doubleVisitPossible = doubleVisitPossible;
 			}
 			public List<Path> getNextPaths() {
+				if ("end".equals(getLastVisitedNode())) {
+					return Collections.emptyList();
+				}
 				List<Path> result = new ArrayList<>();
 				Set<String> nextPossibleNodes = getTargets(getLastVisitedNode());
+				if (doubleVisitPossible) {
+					Set<String> doubleVisitNodes = new HashSet<>(nextPossibleNodes);
+					doubleVisitNodes.retainAll(blockedNodes);
+					doubleVisitNodes.remove("start");
+					doubleVisitNodes.remove("end");
+					for (String doubleVisitNode:doubleVisitNodes) {
+						result.add(new Path(this, doubleVisitNode, false));
+					}
+				}
 				nextPossibleNodes.removeAll(blockedNodes);
 				for (String nextPossibleNode:nextPossibleNodes) {
 					result.add(new Path(this, nextPossibleNode));
@@ -133,8 +148,42 @@ public class Y21Day12 {
 		System.out.println(pathCounter);
 	}
 
+	public static void mainPart2() throws FileNotFoundException {
+		
+		Cave cave = new Cave();
+		try (Scanner scanner = new Scanner(new File("input/y21/day12.txt"))) {
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX+"'");
+				}
+				String fromNode = line.replaceFirst(INPUT_RX, "$1");
+				String toNode = line.replaceFirst(INPUT_RX, "$2");
+				cave.addWay(fromNode, toNode);
+				cave.addWay(toNode, fromNode);  // bidirectional ways.
+			}
+		}
+		System.out.println(cave);
+		List<Path> nextPaths = new ArrayList<>();
+		nextPaths.add(cave.getStartPath());
+		Utils.Counter pathCounter = new Utils.Counter();
+		while (!nextPaths.isEmpty()) {
+			nextPaths = cave.findNextPaths(nextPaths);
+			nextPaths.forEach(p -> {
+				if (p.isFinished() ) {
+					pathCounter.inc();
+					System.out.println(p);
+				}
+			});
+		}
+		System.out.println(pathCounter);
+	}
+
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
