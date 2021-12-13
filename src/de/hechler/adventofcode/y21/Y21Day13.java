@@ -35,6 +35,42 @@ public class Y21Day13 {
 				dots.add(new Point(xPos, yPos));
 			}
 			System.out.println("#"+dots.size()+" - "+dots);
+			Set<Point> foldedDots = dots;
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX_2)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX_2+"'");
+				}
+				boolean foldX = line.replaceFirst(INPUT_RX_2, "$1").equals("x");
+				Integer foldValue = Integer.parseInt(line.replaceFirst(INPUT_RX_2, "$2"));
+				System.out.println(line);
+				foldedDots = fold(foldedDots, foldX, foldValue);
+				System.out.println("#"+foldedDots.size()+" - "+foldedDots);
+				break;
+			}
+		}
+	}
+
+	public static void mainPart2() throws FileNotFoundException {
+		
+		Set<Point> dots = new HashSet<Point>();
+		try (Scanner scanner = new Scanner(new File("input/y21/day13.txt"))) {
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					break;
+				}
+				if (!line.matches(INPUT_RX_1)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX_1+"'");
+				}
+				Integer xPos = Integer.parseInt(line.replaceFirst(INPUT_RX_1, "$1"));
+				Integer yPos = Integer.parseInt(line.replaceFirst(INPUT_RX_1, "$2"));
+				dots.add(new Point(xPos, yPos));
+			}
+			System.out.println("#"+dots.size()+" - "+dots);
 			show(dots);
 			Set<Point> foldedDots = dots;
 			while (scanner.hasNext()) {
@@ -51,7 +87,6 @@ public class Y21Day13 {
 				foldedDots = fold(foldedDots, foldX, foldValue);
 				show(foldedDots);
 				System.out.println("#"+foldedDots.size()+" - "+foldedDots);
-				break;
 			}
 		}
 	}
@@ -84,7 +119,7 @@ public class Y21Day13 {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
