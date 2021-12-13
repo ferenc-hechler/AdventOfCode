@@ -17,6 +17,8 @@ public class Utils {
 		public int dec(int n) { count -= n; return count; }
 		public int get() { return count; }
 		public void set(int value) { count = value; }
+		public void max(int value) { count = Math.max(count, value); }
+		public void min(int value) { count = Math.min(count, value); }
 		@Override public String toString() { return Integer.toString(count); }
 	}
 	
@@ -30,6 +32,8 @@ public class Utils {
 		public long dec(long n) { count -= n; return count; }
 		public long get() { return count; }
 		public void set(long value) { count = value; }
+		public void max(int value) { count = Math.max(count, value); }
+		public void min(int value) { count = Math.min(count, value); }
 		@Override public String toString() { return Long.toString(count); }
 	}
 	

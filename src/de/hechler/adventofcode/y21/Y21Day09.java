@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -253,7 +252,7 @@ public class Y21Day09 {
 	}
 
 	public static void mainPart2() throws FileNotFoundException {
-		try (Scanner scanner = new Scanner(new File("input/y21/day09.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day09test.txt"))) {
 			List<List<Integer>> inputNumbers = new ArrayList<>();
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
