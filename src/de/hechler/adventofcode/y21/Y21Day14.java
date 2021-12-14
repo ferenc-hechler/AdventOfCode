@@ -2,16 +2,15 @@ package de.hechler.adventofcode.y21;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import de.hechler.adventofcode.y21.Utils.Counter;
-import de.hechler.adventofcode.y21.Utils.LongCounter;
+import de.hechler.adventofcode.y21.Utils.CounterMap;
 import de.hechler.adventofcode.y21.Utils.LongCounterMap;
 
 /**
@@ -23,10 +22,14 @@ public class Y21Day14 {
 	private final static String INPUT_RX_1 = "^([A-Z]+)$";
 	private final static String INPUT_RX_2 = "^([A-Z][A-Z]) -> ([A-Z])$";
 
+	
+	private static class PairCounter extends LongCounterMap<String> {
+		
+	}
+	
 
-
-	private static LongCounterMap<String> buildPolyStructure(String polymere) {
-		LongCounterMap<String> result = new LongCounterMap();
+	private static PairCounter buildPolyStructure(String polymere) {
+		PairCounter result = new PairCounter();
 		for (int i=0; i<polymere.length(); i++) {
 			String pair = (polymere+"?").substring(i, i+2);
 			result.inc(pair);
@@ -34,8 +37,8 @@ public class Y21Day14 {
 		return result;
 	}
 
-	private static LongCounterMap<String> transform(LongCounterMap<String> structure, Map<String, String> rules) {
-		LongCounterMap<String> result = new LongCounterMap<>();
+	private static PairCounter transform(PairCounter structure, Map<String, String> rules) {
+		PairCounter result = new PairCounter();
 		Set<String> pairs = structure.getKeys();
 		for (String pair:pairs) {
 			if (pair.endsWith("?")) {
@@ -43,7 +46,7 @@ public class Y21Day14 {
 				continue;
 			}
 			String insertion = rules.get(pair);
-			long cnt = structure.get(pair);
+			long cnt = structure.getCount(pair);
 			result.inc(pair.charAt(0)+insertion, cnt);
 			result.inc(insertion+pair.charAt(1), cnt);
 		}
@@ -52,11 +55,11 @@ public class Y21Day14 {
 
 
 	
-	private static Map<Character, Long> countElements(LongCounterMap<String> pairStructure) {
+	private static Map<Character, Long> countElements(PairCounter pairStructure) {
 		LongCounterMap<Character> result = new LongCounterMap<>();
 		Set<String> pairs = pairStructure.getKeys();
 		for (String pair:pairs) {
-			long cnt = pairStructure.get(pair);
+			long cnt = pairStructure.getCount(pair);
 			result.add(pair.charAt(0), cnt);
 		}
 		return result.toScalarMap();
@@ -90,7 +93,7 @@ public class Y21Day14 {
 			System.out.println(polymere);
 			System.out.println(rules);
 
-			LongCounterMap<String> pairStructure = buildPolyStructure(polymere);
+			PairCounter pairStructure = buildPolyStructure(polymere);
 			Map<Character, Long> counts = countElements(pairStructure);
 			System.out.println(counts);
 			
@@ -106,7 +109,7 @@ public class Y21Day14 {
 			long min = Utils.minL(counts.values());
 			System.out.println("max: "+max);
 			System.out.println("min: "+min);
-			System.out.println("max-min: "+(max-min));
+			System.out.println("max-min: "+(max-min) + " (expected: 3152788426516)");
 		}
 	}
 
@@ -141,17 +144,12 @@ public class Y21Day14 {
 				polymere = transform_part1(polymere, rules);
 				System.out.println(i+": "+polymere);
 			}
-			final Map<Character, Utils.Counter> countChars = new HashMap<>();
+			final CounterMap<Character> countChars = new CounterMap<>();
 			for (char c:polymere.toCharArray()) {
-				Counter counter = countChars.get(c);
-				if (counter == null) {
-					counter = new Utils.Counter();
-					countChars.put(c, counter);
-				}
-				counter.inc();
+				countChars.inc(c);
 			}
 			System.out.println(countChars);
-			List<Integer> counts = countChars.values().stream().map(cntr -> cntr.get()).collect(Collectors.toList());
+			List<Integer> counts = new ArrayList<>(countChars.toScalarMap().values());
 			Collections.sort(counts);
 			int min = counts.get(0);
 			int max = counts.get(counts.size()-1);
@@ -181,7 +179,7 @@ public class Y21Day14 {
 
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart2();
+		mainPart1();
 	}
 
 	

@@ -35,8 +35,8 @@ public class Utils {
 		public int add(T t, int n) { return inc(t, n); }
 		public int dec(T t) { return inc(t, -1); }
 		public int dec(T t, int n) { return inc(t, -n); }
-		public int get(T t) { return get(t, 0); }
-		public int get(T t, int defaultValue) { return (counterMap.containsKey(t) ? counterMap.get(t).get() : defaultValue); }
+		public int getCount(T t) { return getCount(t, 0); }
+		public int getCount(T t, int defaultValue) { return (counterMap.containsKey(t) ? counterMap.get(t).get() : defaultValue); }
 		public void set(T t, int value) { getOrCreateCounter(t).set(value); }
 		public void max(T t, int value) { getOrCreateCounter(t, value).max(value); }
 		public void min(T t, int value) { getOrCreateCounter(t, value).min(value); }
@@ -76,8 +76,8 @@ public class Utils {
 		public long add(T t, long n) { return inc(t, n); }
 		public long dec(T t) { return inc(t, -1); }
 		public long dec(T t, long n) { return inc(t, -n); }
-		public long get(T t) { return get(t, 0); }
-		public long get(T t, long defaultValue) { return (counterMap.containsKey(t) ? counterMap.get(t).get() : defaultValue); }
+		public long getCount(T t) { return getCount(t, 0); }
+		public long getCount(T t, long defaultValue) { return (counterMap.containsKey(t) ? counterMap.get(t).get() : defaultValue); }
 		public void set(T t, long value) { getOrCreateCounter(t).set(value); }
 		public void max(T t, long value) { getOrCreateCounter(t, value).max(value); }
 		public void min(T t, long value) { getOrCreateCounter(t, value).min(value); }
