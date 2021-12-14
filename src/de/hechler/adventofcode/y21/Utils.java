@@ -2,6 +2,7 @@ package de.hechler.adventofcode.y21;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -245,15 +246,25 @@ public class Utils {
 		return sortedList.get(sortedList.size()/2);
 	}
 
-	public static int min(List<Integer> values) {
+	public static int min(Collection<Integer> values) {
 		Integer result = values.stream().min(Integer::compare).get();
 		return result;
 	}
 	
-	public static int max(List<Integer> crabPositions) {
-		Integer result = crabPositions.stream().max(Integer::compare).get();
+	public static int max(Collection<Integer> values) {
+		Integer result = values.stream().max(Integer::compare).get();
 		return result;
 	}
+
+	public static long maxL(Collection<Long> values) {
+		Long result = values.stream().max(Long::compare).get();
+		return result;
+	}
+	public static long minL(Collection<Long> values) {
+		Long result = values.stream().min(Long::compare).get();
+		return result;
+	}
+
 
 	public static int min(int[] values) {
 		int result = Integer.MAX_VALUE;
