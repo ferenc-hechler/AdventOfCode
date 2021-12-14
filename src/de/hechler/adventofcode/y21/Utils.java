@@ -4,7 +4,10 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Utils {
 
@@ -12,10 +15,10 @@ public class Utils {
 		private int count;
 		public Counter() { this(0); }
 		public Counter(int count) { this.count = count; }
-		public int inc() { return inc(1); }
 		public int inc(int n) { count += n; return count; }
-		public int dec() { return dec(1); }
-		public int dec(int n) { count -= n; return count; }
+		public int inc() { return inc(1); }
+		public int dec() { return inc(-1); }
+		public int dec(int n) { return inc(-n); }
 		public int get() { return count; }
 		public void set(int value) { count = value; }
 		public void max(int value) { count = Math.max(count, value); }
@@ -23,21 +26,73 @@ public class Utils {
 		@Override public String toString() { return Integer.toString(count); }
 	}
 	
+	public static class CounterMap<T> {
+		private Map<T, Counter> counterMap;
+		public CounterMap() { counterMap = new HashMap<>(); }
+		public int inc(T t, int n) { return getOrCreateCounter(t).inc(n); }
+		public int inc(T t) { return inc(t, 1); }
+		public int add(T t) { return inc(t); }
+		public int add(T t, int n) { return inc(t, n); }
+		public int dec(T t) { return inc(t, -1); }
+		public int dec(T t, int n) { return inc(t, -n); }
+		public int get(T t) { return get(t, 0); }
+		public int get(T t, int defaultValue) { return (counterMap.containsKey(t) ? counterMap.get(t).get() : defaultValue); }
+		public void set(T t, int value) { getOrCreateCounter(t).set(value); }
+		public void max(T t, int value) { getOrCreateCounter(t, value).max(value); }
+		public void min(T t, int value) { getOrCreateCounter(t, value).min(value); }
+		public Set<T> getKeys() { return counterMap.keySet(); }
+		public Map<T, Integer> toScalarMap() {
+			final Map<T, Integer> result = new HashMap<>();
+			counterMap.forEach((t, cntr) -> result.put(t, cntr.get()));
+			return result;
+		}
+		@Override
+		public String toString() { return counterMap.toString(); }
+		private Counter getOrCreateCounter(T t) { return getOrCreateCounter(t, 0); }
+		private Counter getOrCreateCounter(T t, final int initialValue) { return counterMap.computeIfAbsent(t, x -> new Counter(initialValue)); }
+	}
+
 	public static class LongCounter {
 		private long count;
 		public LongCounter() { this(0); }
 		public LongCounter(long count) { this.count = count; }
-		public long inc() { return inc(1); }
 		public long inc(long n) { count += n; return count; }
-		public long dec() { return dec(1); }
-		public long dec(long n) { count -= n; return count; }
+		public long inc() { return inc(1); }
+		public long dec() { return inc(-1); }
+		public long dec(long n) { return inc(-n); }
 		public long get() { return count; }
 		public void set(long value) { count = value; }
-		public void max(int value) { count = Math.max(count, value); }
-		public void min(int value) { count = Math.min(count, value); }
+		public void max(long value) { count = Math.max(count, value); }
+		public void min(long value) { count = Math.min(count, value); }
 		@Override public String toString() { return Long.toString(count); }
 	}
 	
+	public static class LongCounterMap<T> {
+		private Map<T, LongCounter> counterMap;
+		public LongCounterMap() { counterMap = new HashMap<>(); }
+		public long inc(T t, long n) { return getOrCreateCounter(t).inc(n); }
+		public long inc(T t) { return inc(t, 1); }
+		public long add(T t) { return inc(t); }
+		public long add(T t, long n) { return inc(t, n); }
+		public long dec(T t) { return inc(t, -1); }
+		public long dec(T t, long n) { return inc(t, -n); }
+		public long get(T t) { return get(t, 0); }
+		public long get(T t, long defaultValue) { return (counterMap.containsKey(t) ? counterMap.get(t).get() : defaultValue); }
+		public void set(T t, long value) { getOrCreateCounter(t).set(value); }
+		public void max(T t, long value) { getOrCreateCounter(t, value).max(value); }
+		public void min(T t, long value) { getOrCreateCounter(t, value).min(value); }
+		public Set<T> getKeys() { return counterMap.keySet(); }
+		public Map<T, Long> toScalarMap() {
+			final Map<T, Long> result = new HashMap<>();
+			counterMap.forEach((t, cntr) -> result.put(t, cntr.get()));
+			return result;
+		}
+		@Override
+		public String toString() { return counterMap.toString(); }
+		private LongCounter getOrCreateCounter(T t) { return getOrCreateCounter(t, 0); }
+		private LongCounter getOrCreateCounter(T t, final long initialValue) { return counterMap.computeIfAbsent(t, x -> new LongCounter(initialValue)); }
+	}
+
 	public static <T> List<T> toList(T[] array) {
 		if (array==null) {
 			return null;
