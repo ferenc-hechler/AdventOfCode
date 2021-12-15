@@ -1,12 +1,12 @@
 package de.hechler.adventofcode.y21;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.awt.Point;
 
 /**
  * see: https://adventofcode.com/2021/day/13

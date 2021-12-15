@@ -3,17 +3,9 @@ package de.hechler.adventofcode.y21;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * see: https://adventofcode.com/2021/day/4
@@ -162,7 +154,6 @@ public class Y21Day04 {
 			
 			BingoBoard lastBoard = null;
 			int lastDrawnNumber = 0;
-			outer:
 			for (int drawnNumber:drawnNumbers) {
 				System.out.println("----------- " + drawnNumber + " ----------------");
 				for(Iterator<BingoBoard> iter=bbs.iterator(); iter.hasNext();) {
