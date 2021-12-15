@@ -1,8 +1,6 @@
 package de.hechler.adventofcode.y20;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
 
 /**
  * see: https://adventofcode.com/2020/day/1

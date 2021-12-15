@@ -3,13 +3,8 @@ package de.hechler.adventofcode.y20;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * see: https://adventofcode.com/2020/day/1
@@ -17,7 +12,7 @@ import java.util.stream.Collectors;
  */
 public class Day03 {
 
-	private final static String RX_LINE = "^[0-9]+-[0-9]+$";
+//	private final static String RX_LINE = "^[0-9]+-[0-9]+$";
 	
 	public static void mainPart1(String[] args) throws FileNotFoundException {
 		List<String> forest = new ArrayList<>();

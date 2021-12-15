@@ -171,7 +171,6 @@ public class Day07 {
 
 	private int countBagsInShinyGolden() {
 		String searchColor = "shiny gold";
-		int result = 0;
 		for (FilledBag fb:filledBags) {
 			if (fb.bag.color.equals(searchColor)) {
 				return fb.countBags();
