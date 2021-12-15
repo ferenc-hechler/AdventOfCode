@@ -1,9 +1,7 @@
 package de.hechler.adventofcode.y21;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class UtilsTest {
@@ -16,6 +14,13 @@ class UtilsTest {
 		for (int intNum: intNums) {
 			System.out.println(intNum);
 		}
+		assertEquals(  6, intNums.length);
+		assertEquals(  2, intNums[0]);
+		assertEquals( 16, intNums[1]);
+		assertEquals(  9, intNums[2]);
+		assertEquals(  4, intNums[3]);
+		assertEquals( 33, intNums[4]);
+		assertEquals(  5, intNums[5]);
 	}
 
 }

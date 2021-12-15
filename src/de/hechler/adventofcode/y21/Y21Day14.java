@@ -179,7 +179,7 @@ public class Y21Day14 {
 
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
