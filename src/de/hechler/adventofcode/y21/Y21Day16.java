@@ -15,7 +15,7 @@ public class Y21Day16 {
 
 	private final static String INPUT_RX = "^([0-9A-F]+)$";
 
-	private final static String[] OP = {"+", "*", "MIN", "MAX", "#", "GT", "LT", "EQ"};
+	private final static String[] OP = {"+", "*", "MIN", "MAX", "#", ">", "<", "="};
 	
 	public static abstract class BasePacket {
 		public int version;
@@ -28,6 +28,7 @@ public class Y21Day16 {
 			return version;
 		}
 		public abstract long calcResult();
+		public abstract String toInfixString();
 		@Override public String toString() {
 			return OP[typeID];
 		}
@@ -41,6 +42,10 @@ public class Y21Day16 {
 		}
 		@Override
 		public String toString() {
+			return ""+value;
+		}
+		@Override
+		public String toInfixString() {
 			return ""+value;
 		}
 		@Override
@@ -75,6 +80,22 @@ public class Y21Day16 {
 				result.append(seperator);
 				result.append(pak.toString());
 				seperator = ",";
+			}
+			result.append(")");
+			return result.toString();
+		}
+		@Override
+		public String toInfixString() {
+			if (OP[typeID].length()>1) {
+				return toString(); 
+			}
+			StringBuilder result = new StringBuilder();
+			result.append("(");
+			String op = "";
+			for (BasePacket pak:subPackets) {
+				result.append(op);
+				result.append(pak.toInfixString());
+				op = OP[typeID];
 			}
 			result.append(")");
 			return result.toString();
@@ -229,7 +250,8 @@ public class Y21Day16 {
 				BitStream bs = new BitStream(bits);
 				BasePacket pak = bs.nextPacket();
 				System.out.println(pak.toString()+" - "+bs.toString());
-				System.out.println("#C="+pak.calcResult());
+				System.out.println(pak.toInfixString());
+				System.out.println("="+pak.calcResult());
 			}
 		}
 	}
