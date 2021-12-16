@@ -61,7 +61,7 @@ public class GeoUtils {
 			this.w = w;
 			this.h = h;
 		}
-		public static Area create(int fromX, int fromY, int toX, int toY) {
+		public static Area createFromTo(int fromX, int fromY, int toX, int toY) {
 			return new Area(fromX, fromY, toX-fromX+1, toY-fromY+1);
 		}
 		public boolean contains(Point p) { return contains(p.x, p.y); }
@@ -73,27 +73,28 @@ public class GeoUtils {
 			return new ReverseMatrixIterator(x, y, x+w-1, y+h-1); 
 		}
 		@Override public String toString() { return "[("+x+","+y+"|"+w+","+h+")]"; }
+		@Override public int hashCode() { return Objects.hash(h, w, x, y); }
+		@Override public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Area other = (Area) obj;
+			return h == other.h && w == other.w && x == other.x && y == other.y;
+		}
 	}
 
 	
-	public abstract static class AbsFilterPoints implements Iterator<Point> {
+	public static class CheckPoints implements Iterator<Point> {
 		protected Iterator<Point> origIterator;
+		protected Predicate<Point> checkFunction;
 		protected Point nextP;
-		protected AbsFilterPoints(Iterator<Point> origIterator) {
+		protected CheckPoints(Predicate<Point> checkFunction, Iterator<Point> origIterator) {
 			this.origIterator = origIterator;
-			this.nextP = null;
-			if (origIterator.hasNext()) {
-				this.nextP = origIterator.next();
-			}
-		}
-		@Override public boolean hasNext() { return nextP != null; }
-		@Override public Point next() {
-			if (!hasNext()) {
-				return null;
-			}
-			Point result = nextP;
-			selectNextP();
-			return result;
+			this.checkFunction = checkFunction;
+			selectNextP(); 
 		}
 		private void selectNextP() {
 			nextP = null;
@@ -105,16 +106,16 @@ public class GeoUtils {
 				}
 		    }
 		}
-		protected abstract boolean checkFilter(Point origNext);
-	}
-
-	public static class CheckPoints extends AbsFilterPoints {
-		protected Predicate<Point> checkFunction;
-		public CheckPoints(Predicate<Point> checkFunction, Iterator<Point> origIterator) {
-			super(origIterator);
-			this.checkFunction = checkFunction;
+		@Override public boolean hasNext() { return nextP != null; }
+		@Override public Point next() {
+			if (!hasNext()) {
+				return null;
+			}
+			Point result = nextP;
+			selectNextP();
+			return result;
 		}
-		@Override protected boolean checkFilter(Point point) { return checkFunction.test(point); }
+		protected boolean checkFilter(Point point) { return checkFunction.test(point); }
 	}
 
 	public static class SkipPoint extends CheckPoints {

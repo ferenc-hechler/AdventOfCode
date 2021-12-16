@@ -18,7 +18,7 @@ public class Y21Day15 {
 	
 	public static void mainPart1() throws FileNotFoundException {
 		
-		try (Scanner scanner = new Scanner(new File("input/y21/day15.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day15example.txt"))) {
 			List<List<Integer>> rowlist = new ArrayList<>();
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
@@ -160,7 +160,7 @@ public class Y21Day15 {
 
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart2();
+		mainPart1();
 	}
 
 	
