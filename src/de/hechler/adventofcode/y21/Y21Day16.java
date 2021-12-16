@@ -15,20 +15,21 @@ public class Y21Day16 {
 
 	private final static String INPUT_RX = "^([0-9A-F]+)$";
 
+	private final static String[] OP = {"+", "*", "MIN", "MAX", "#", "GT", "LT", "EQ"};
 	
-	public static class BasePacket {
+	public static abstract class BasePacket {
 		public int version;
 		public int typeID;
 		public BasePacket(int version, int typeID) {
 			this.version = version;
 			this.typeID = typeID;
 		}
-		@Override
-		public String toString() {
-			return "P[v="+version+",type="+typeID+"]";
-		}
 		public int countVersions() {
 			return version;
+		}
+		public abstract long calcResult();
+		@Override public String toString() {
+			return OP[typeID];
 		}
 	}
 		
@@ -40,7 +41,11 @@ public class Y21Day16 {
 		}
 		@Override
 		public String toString() {
-			return "P[v="+version+",type="+typeID+"="+value+"]";
+			return ""+value;
+		}
+		@Override
+		public long calcResult() {
+			return value;
 		}
 	}
 
@@ -63,7 +68,64 @@ public class Y21Day16 {
 		}
 		@Override
 		public String toString() {
-			return "P[v="+version+",type="+typeID+"#"+subPackets+"]";
+			StringBuilder result = new StringBuilder();
+			result.append(OP[typeID]).append("(");
+			String seperator = "";
+			for (BasePacket pak:subPackets) {
+				result.append(seperator);
+				result.append(pak.toString());
+				seperator = ",";
+			}
+			result.append(")");
+			return result.toString();
+		}
+		@Override
+		public long calcResult() {
+			long result, v1, v2;
+			switch(typeID) {
+			case 0: // sum
+				result = 0;
+				for (BasePacket pak:subPackets) {
+					result += pak.calcResult();
+				}
+				break;
+			case 1: // product
+				result = 1;
+				for (BasePacket pak:subPackets) {
+					result *= pak.calcResult();
+				}
+				break;
+			case 2: // minimum
+				result = Long.MAX_VALUE;
+				for (BasePacket pak:subPackets) {
+					result = Math.min(result, pak.calcResult());
+				}
+				break;
+			case 3: // maximum
+				result = Long.MIN_VALUE;
+				for (BasePacket pak:subPackets) {
+					result = Math.max(result, pak.calcResult());
+				}
+				break;
+			case 5: // greater than
+				v1 = subPackets.get(0).calcResult();
+				v2 = subPackets.get(1).calcResult();
+				result = (v1 > v2) ? 1 : 0;
+				break;
+			case 6: // less than
+				v1 = subPackets.get(0).calcResult();
+				v2 = subPackets.get(1).calcResult();
+				result = (v1 < v2) ? 1 : 0;
+				break;
+			case 7: // equal
+				v1 = subPackets.get(0).calcResult();
+				v2 = subPackets.get(1).calcResult();
+				result = (v1 == v2) ? 1 : 0;
+				break;
+			default:
+				throw new RuntimeException("invalid operator type "+typeID);
+			}
+			return result;
 		}
 	}
 	
@@ -139,6 +201,40 @@ public class Y21Day16 {
 		}
 	}
 	
+	private static int[] decodeHex(String hex) {
+		List<Integer> result = new ArrayList<>(); 
+		for (char c:hex.toCharArray()) {
+			int n = Integer.parseInt(""+c, 16);
+			result.add((n>>3)&0x01);
+			result.add((n>>2)&0x01);
+			result.add((n>>1)&0x01);
+			result.add( n    &0x01);
+		}
+		return Utils.toIntArray(result);
+	}
+
+	public static void mainPart2() throws FileNotFoundException {
+		
+		try (Scanner scanner = new Scanner(new File("input/y21/day16.txt"))) {
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX2 '"+INPUT_RX+"'");
+				}
+				System.out.println(line);
+				int[] bits = decodeHex(line);
+				BitStream bs = new BitStream(bits);
+				BasePacket pak = bs.nextPacket();
+				System.out.println(pak.toString()+" - "+bs.toString());
+				System.out.println("#C="+pak.calcResult());
+			}
+		}
+	}
+
+
 	public static void mainPart1() throws FileNotFoundException {
 		
 		try (Scanner scanner = new Scanner(new File("input/y21/day16.txt"))) {
@@ -160,20 +256,8 @@ public class Y21Day16 {
 		}
 	}
 
-	private static int[] decodeHex(String hex) {
-		List<Integer> result = new ArrayList<>(); 
-		for (char c:hex.toCharArray()) {
-			int n = Integer.parseInt(""+c, 16);
-			result.add((n>>3)&0x01);
-			result.add((n>>2)&0x01);
-			result.add((n>>1)&0x01);
-			result.add( n    &0x01);
-		}
-		return Utils.toIntArray(result);
-	}
-
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
