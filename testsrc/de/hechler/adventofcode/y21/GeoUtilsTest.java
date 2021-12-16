@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import de.hechler.adventofcode.y21.GeoUtils.Area;
+import de.hechler.adventofcode.y21.GeoUtils.ClipArea;
 import de.hechler.adventofcode.y21.GeoUtils.Point;
 import de.hechler.adventofcode.y21.GeoUtils.SkipPoint;
 
@@ -144,8 +145,13 @@ class GeoUtilsTest {
 				    + "(13,11), (12,11), (11,11), (10,11), "
 				    + "(13,10), (12,10), (11,10), (10,10)]", 
 			        rps.toString());
-		
-		ps = new ArrayList<>();
+
+	}
+
+	@Test
+	void testPointIteratorFilter() {
+		List<Point> ps = new ArrayList<>();
+		Area a = new Area (10,10, 4,3);
 		Iterator<Point> it = new SkipPoint(new Point(12,11), a.iterator()); 
 		while (it.hasNext()) {
 			ps.add(it.next());
@@ -175,6 +181,37 @@ class GeoUtilsTest {
 				    + "(10,12), (11,12), (12,12)]", 
 			   ps.toString());
 		
+		ps = new ArrayList<>();
+		it = new ClipArea(Area.createFromTo(5,5, 11,11), a.iterator()); 
+		while (it.hasNext()) {
+			ps.add(it.next());
+		}
+		assertEquals("[(10,10), (11,10), "
+				    + "(10,11), (11,11)]", 
+			        ps.toString());
+		
 	}
 
+	@Test
+	void testAreaOverlap() { 
+		Area a = new Area(10,10, 10,10);
+		
+		assertTrue(a.overlaps(new Area( 15,15, 10,10)));
+		assertTrue(a.overlaps(new Area(  5, 5, 10,10)));
+		assertTrue(a.overlaps(new Area(  5,15, 10,10)));
+		assertTrue(a.overlaps(new Area( 15, 5, 10,10)));
+		
+		assertFalse(a.overlaps(new Area( 0, 0, 10,10)));
+		assertFalse(a.overlaps(new Area(20,20, 10,10)));
+		assertFalse(a.overlaps(new Area( 0,20, 10,10)));
+		assertFalse(a.overlaps(new Area(20, 0, 10,10)));
+
+		assertTrue(a.overlaps(new Area( 1, 1, 10,10)));
+		assertTrue(a.overlaps(new Area(19,19, 10,10)));
+		assertTrue(a.overlaps(new Area( 1,19, 10,10)));
+		assertTrue(a.overlaps(new Area(19, 1, 10,10)));
+		
+	}
+
+	
 }

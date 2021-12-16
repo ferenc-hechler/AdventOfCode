@@ -51,30 +51,46 @@ public class GeoUtils {
 
 	
 	public static class Area implements Iterable<Point> {
-		protected int x;
-		protected int y;
-		protected int w;
-		protected int h;
+		protected int minX;
+		protected int minY;
+		protected int maxX;
+		protected int maxY;
 		public Area(int x, int y, int w, int h) {
-			this.x = x;
-			this.y = y;
-			this.w = w;
-			this.h = h;
+			this.minX = x;
+			this.minY = y;
+			this.maxX = x+w;
+			this.maxY = y+h;
 		}
 		public static Area createFromTo(int fromX, int fromY, int toX, int toY) {
 			return new Area(fromX, fromY, toX-fromX+1, toY-fromY+1);
 		}
+		public int x() { return minX; }
+		public int y() { return minY; }
+		public int w() { return maxX-minX; }
+		public int h() { return maxY-minY; }
+		public int fromX() { return minX; }
+		public int fromY() { return minY; }
+		public int toX() { return maxX-1; }
+		public int toY() { return maxY-1; }
 		public boolean contains(Point p) { return contains(p.x, p.y); }
-		public boolean contains(int px, int py) { return px>=x && py>=y && px<x+w && py<y+h; }
+		public boolean contains(int px, int py) { return px>=minX && py>=minY && px<maxX && py<maxY; }
+		public boolean overlaps(Area otherArea) { 
+			return  (maxX>otherArea.minX)&&(maxY>otherArea.minY) && 
+					(minX<otherArea.maxX)&&(minY<otherArea.maxY); 
+		}
+
 		@Override public Iterator<Point> iterator() {
-			return new MatrixIterator(x, y, x+w-1, y+h-1); 
+			return new MatrixIterator(fromX(), fromY(), toX(), toY()); 
 		}
 		public Iterator<Point> reverseIterator() { 
-			return new ReverseMatrixIterator(x, y, x+w-1, y+h-1); 
+			return new ReverseMatrixIterator(fromX(), fromY(), toX(), toY()); 
 		}
-		@Override public String toString() { return "[("+x+","+y+"|"+w+","+h+")]"; }
-		@Override public int hashCode() { return Objects.hash(h, w, x, y); }
-		@Override public boolean equals(Object obj) {
+		@Override
+		public int hashCode() {
+			return Objects.hash(maxX, maxY, minX, minY);
+		}
+		@Override
+		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
 			if (obj == null)
@@ -82,8 +98,9 @@ public class GeoUtils {
 			if (getClass() != obj.getClass())
 				return false;
 			Area other = (Area) obj;
-			return h == other.h && w == other.w && x == other.x && y == other.y;
+			return maxX == other.maxX && maxY == other.maxY && minX == other.minX && minY == other.minY;
 		}
+		@Override public String toString() { return "[("+minX+","+minY+"|"+w()+","+h()+")]"; }
 	}
 
 	
@@ -125,8 +142,11 @@ public class GeoUtils {
 	}
 
 	public static class ClipArea extends CheckPoints {
-		public ClipArea(final int minX, final int minY, final int maxX, final int maxY, Iterator<Point> origIterator) {
-			super(p -> minX<=p.x&&p.x<=maxX&&minY<=p.y&&p.y<=maxY, origIterator);
+		public ClipArea(final int fromX, final int fromY, final int toX, final int toY, Iterator<Point> origIterator) {
+			super(p -> fromX<=p.x&&p.x<=toX&&fromY<=p.y&&p.y<=toY, origIterator);
+		}
+		public ClipArea(final Area area, Iterator<Point> origIterator) {
+			super(area::contains, origIterator);
 		}
 	}
 
