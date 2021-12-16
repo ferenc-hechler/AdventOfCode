@@ -5,33 +5,28 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 /**
- * see: https://adventofcode.com/2021/day/14
+ * see: https://adventofcode.com/2021/day/16
  *
  */
 public class Y21Day16 {
 
-	private final static String INPUT_RX = "^([0-9A-F]+)$";
+	private static final String INPUT_RX = "^([0-9A-F]+)$";
 
-	private final static String[] OP = {"+", "*", "MIN", "MAX", "#", ">", "<", "="};
+	private static final String[] OP = {"+", "*", "MIN", "MAX", "#", ">", "<", "="};
 	
-	public static abstract class BasePacket {
-		public int version;
-		public int typeID;
+	public abstract static class BasePacket {
+		protected int version;
+		protected int typeID;
 		public BasePacket(int version, int typeID) {
 			this.version = version;
 			this.typeID = typeID;
 		}
-		public int countVersions() {
-			return version;
-		}
+		public int countVersions() { return version; }
 		public abstract long calcResult();
-		public abstract String toInfixString();
-		@Override public String toString() {
-			return OP[typeID];
-		}
+		public String toInfixString() { return toString(); };
+		@Override public String toString() { return OP[typeID]; }
 	}
 		
 	public static class LiteralPacket extends BasePacket {
@@ -40,18 +35,8 @@ public class Y21Day16 {
 			super(version, typeID);
 			this.value = value;
 		}
-		@Override
-		public String toString() {
-			return ""+value;
-		}
-		@Override
-		public String toInfixString() {
-			return ""+value;
-		}
-		@Override
-		public long calcResult() {
-			return value;
-		}
+		@Override public String toString() { return ""+value; }
+		@Override public long calcResult() { return value; }
 	}
 
 	public static class OperatorPacket extends BasePacket {
@@ -129,16 +114,19 @@ public class Y21Day16 {
 				}
 				break;
 			case 5: // greater than
+				if (subPackets.size()!=2) throw new RuntimeException("invalid number of subpackets");
 				v1 = subPackets.get(0).calcResult();
 				v2 = subPackets.get(1).calcResult();
 				result = (v1 > v2) ? 1 : 0;
 				break;
 			case 6: // less than
+				if (subPackets.size()!=2) throw new RuntimeException("invalid number of subpackets");
 				v1 = subPackets.get(0).calcResult();
 				v2 = subPackets.get(1).calcResult();
 				result = (v1 < v2) ? 1 : 0;
 				break;
 			case 7: // equal
+				if (subPackets.size()!=2) throw new RuntimeException("invalid number of subpackets");
 				v1 = subPackets.get(0).calcResult();
 				v2 = subPackets.get(1).calcResult();
 				result = (v1 == v2) ? 1 : 0;
@@ -196,10 +184,7 @@ public class Y21Day16 {
 			return result;
 		}
 		public int decodeBits(int size) {
-			return (int)decodeBitsL(size);
-		}
-		public long decodeBitsL(int size) {
-			long result = 0;
+			int result = 0;
 			for (int i=0; i<size; i++) {
 				result = (result << 1) | next();
 			}
@@ -234,6 +219,27 @@ public class Y21Day16 {
 		return Utils.toIntArray(result);
 	}
 
+	public static void mainPart1() throws FileNotFoundException {
+		
+		try (Scanner scanner = new Scanner(new File("input/y21/day16.txt"))) {
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX2 '"+INPUT_RX+"'");
+				}
+				System.out.println(line);
+				int[] bits = decodeHex(line);
+				BitStream bs = new BitStream(bits);
+				BasePacket pak = bs.nextPacket();
+				System.out.println(pak.toString()+" - "+bs.toString());
+				System.out.println("#V="+pak.countVersions());
+			}
+		}
+	}
+	
 	public static void mainPart2() throws FileNotFoundException {
 		
 		try (Scanner scanner = new Scanner(new File("input/y21/day16.txt"))) {
@@ -257,26 +263,6 @@ public class Y21Day16 {
 	}
 
 
-	public static void mainPart1() throws FileNotFoundException {
-		
-		try (Scanner scanner = new Scanner(new File("input/y21/day16.txt"))) {
-			while (scanner.hasNext()) {
-				String line = scanner.nextLine().trim();
-				if (line.isEmpty()) {
-					continue;
-				}
-				if (!line.matches(INPUT_RX)) {
-					throw new RuntimeException("invalid input line '"+line+"', not matching RX2 '"+INPUT_RX+"'");
-				}
-				System.out.println(line);
-				int[] bits = decodeHex(line);
-				BitStream bs = new BitStream(bits);
-				BasePacket pak = bs.nextPacket();
-				System.out.println(pak.toString()+" - "+bs.toString());
-				System.out.println("#V="+pak.countVersions());
-			}
-		}
-	}
 
 	public static void main(String[] args) throws FileNotFoundException {
 		mainPart2();
