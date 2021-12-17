@@ -61,13 +61,14 @@ public class Y21Day17 {
 				if (!line.matches(INPUT_RX)) {
 					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX+"'");
 				}
+				System.out.println(line);
 				int fromX = Integer.parseInt(line.replaceFirst(INPUT_RX, "$1"));
 				int toX = Integer.parseInt(line.replaceFirst(INPUT_RX, "$2"));
 				int fromY = Integer.parseInt(line.replaceFirst(INPUT_RX, "$3"));
 				int toY = Integer.parseInt(line.replaceFirst(INPUT_RX, "$4"));
 				Area targetArea = Area.createFromTo(fromX, fromY, toX, toY);
 				System.out.println(targetArea);
-				simulateThrow(targetArea, 10,-1);
+				System.out.println(simulateThrow(targetArea, 10,-2));
 				int countHits = 0;
 				for (int dx=0; dx<=toX; dx++) {
 					for (int dy=fromY; dy<=-fromY; dy++) {
@@ -89,14 +90,18 @@ public class Y21Day17 {
 	private static int simulateThrow(Area targetArea, int dx, int dy) {
 		Point position = new Point(0,0);
 		int highestY = 0;
-		while (position.y()+dy>=targetArea.fromY() && !targetArea.contains(position)) {
-			position = position.offset(dx, dy);
+		while (position.y()>=targetArea.fromY()) {
 //			System.out.println(position);
 			highestY = Math.max(highestY, position.y());
+			if (targetArea.contains(position)) {
+				return highestY;
+			}
+			position = position.offset(dx, dy);
 			dx = Math.max(0, dx-1);
 			dy--;
 		}
-		return targetArea.contains(position) ? highestY : Integer.MIN_VALUE;
+//		System.out.println("OUT: "+position);
+		return Integer.MIN_VALUE;
 	}
 
 
