@@ -50,23 +50,59 @@ public class Y21Day17 {
 	
 	
 	
+	public static void mainPart2() throws FileNotFoundException {
+		
+		try (Scanner scanner = new Scanner(new File("input/y21/day17.txt"))) {
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX+"'");
+				}
+				int fromX = Integer.parseInt(line.replaceFirst(INPUT_RX, "$1"));
+				int toX = Integer.parseInt(line.replaceFirst(INPUT_RX, "$2"));
+				int fromY = Integer.parseInt(line.replaceFirst(INPUT_RX, "$3"));
+				int toY = Integer.parseInt(line.replaceFirst(INPUT_RX, "$4"));
+				Area targetArea = Area.createFromTo(fromX, fromY, toX, toY);
+				System.out.println(targetArea);
+				simulateThrow(targetArea, 10,-1);
+				int countHits = 0;
+				for (int dx=0; dx<=toX; dx++) {
+					for (int dy=fromY; dy<=-fromY; dy++) {
+						int highY = simulateThrow(targetArea, dx,dy);
+						if (highY != Integer.MIN_VALUE) {
+							System.out.println("("+dx+","+dy+")");
+							countHits++;
+						}
+					}
+				}
+				System.out.println("HITS: "+countHits);
+				break;
+			}
+		}
+	}
+	
+	
+	
 	private static int simulateThrow(Area targetArea, int dx, int dy) {
 		Point position = new Point(0,0);
 		int highestY = 0;
-		while (position.y()+dy>=targetArea.fromY()) {
+		while (position.y()+dy>=targetArea.fromY() && !targetArea.contains(position)) {
 			position = position.offset(dx, dy);
 //			System.out.println(position);
 			highestY = Math.max(highestY, position.y());
 			dx = Math.max(0, dx-1);
 			dy--;
 		}
-		return targetArea.contains(position) ? highestY : 0;
+		return targetArea.contains(position) ? highestY : Integer.MIN_VALUE;
 	}
 
 
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
