@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-import de.hechler.adventofcode.y21.GeoUtils.Area;
-import de.hechler.adventofcode.y21.GeoUtils.Point;
-
 /**
  * see: https://adventofcode.com/2021/day/18
  *
@@ -16,13 +13,15 @@ public class Y21Day18 {
 	private final static String INPUT_RX = "^([0-9\\[\\],]+)$";
 
 	public static abstract class SFExpression {
+		protected SFTerm parent; 
+		public SFExpression() { parent = null; }
 		public boolean isValue() { return false; }
 		public boolean isTerm() { return false; }
 		public SFExpression getLeftExpression() { throw new UnsupportedOperationException(); }
 		public SFExpression getRightExpression() { throw new UnsupportedOperationException(); }
 		public int getValue() { throw new UnsupportedOperationException(); }
-		public static SFExpression read(String input) {
-			return read(new Tokenizer(input));
+		public static SFTerm readTerm(String input) {
+			return read(new Tokenizer(input)).asTerm();
 		}
 		public static SFExpression read(Tokenizer tok) {
 			SFExpression result;
@@ -39,12 +38,22 @@ public class Y21Day18 {
 			}
 			return result;
 		}
+		public SFValue asValue() { return isValue() ? (SFValue)this : null; }
+		public SFTerm asTerm() { return isTerm() ? (SFTerm)this : null; }
+		protected boolean explode(int depth) { return false; }
+		protected boolean split() { return false; }
+		protected void setParent(SFTerm parent) { this.parent=parent; }
+		protected void propagateToLeft(int n) { throw new UnsupportedOperationException(); }
+		protected void propagateToRight(int n) { throw new UnsupportedOperationException(); }
 	}
 	
 	public static class SFValue extends SFExpression {
 		private int value;
 		public SFValue(int value) { this.value = value; }
 		public int getValue() { return value; }
+		public boolean isValue() { return true; }
+		protected void propagateToLeft(int n) { value += n; }
+		protected void propagateToRight(int n) { value += n; }
 		@Override public String toString() { return ""+value; }
 	}
 	
@@ -54,9 +63,130 @@ public class Y21Day18 {
 		public SFTerm(SFExpression leftExpression, SFExpression rightExpression) {
 			this.leftExpression = leftExpression;
 			this.rightExpression = rightExpression;
+			this.parent = null;
+			leftExpression.setParent(this);
+			rightExpression.setParent(this);
+			
 		}
 		public SFExpression getLeftExpression() { return leftExpression; }
 		public SFExpression getRightExpression() { return rightExpression; }
+		public boolean isTerm() { return true; }
+		public boolean isSimpleExpression() { return leftExpression.isValue() && rightExpression.isValue(); }
+		public SFTerm add(SFTerm other) {
+			SFTerm result = new SFTerm(this, other);
+			result.reduce();
+			return result;
+		}
+		private void reduce() {
+			boolean changed = true;
+			while (changed) {
+//				System.out.println(this);
+				changed = explode(1);
+//				System.out.println(this);
+				if (changed) { continue; }
+				changed = split();
+			}
+		}
+		@Override protected boolean explode(int depth) {
+			if (isSimpleExpression()) {
+				return false;
+			}
+			boolean changed = false;
+			if (depth < 4) {
+				changed |= leftExpression.explode(depth+1);
+				changed |= rightExpression.explode(depth+1);
+				return changed;
+			}
+			if (leftExpression.isTerm()) {
+				System.out.println("BEFORE EXPLODE LEFT:  "+getRootParent());
+				assert leftExpression.asTerm().isSimpleExpression();
+				int vLeft = leftExpression.asTerm().getLeftExpression().asValue().getValue();
+				int vRight = leftExpression.asTerm().getRightExpression().asValue().getValue();
+				leftExpression = new SFValue(0);
+				leftExpression.setParent(this);
+				SFTerm parentWithNewLeftChild = findParentWithNewLeftChild();
+				if (parentWithNewLeftChild != null) {
+					parentWithNewLeftChild.getLeftExpression().propagateToRight(vLeft);
+				}
+				rightExpression.propagateToLeft(vRight);
+				System.out.println("AFTER EXPLODE LEFT:   "+getRootParent());
+				changed = true;
+			}
+			if (rightExpression.isTerm()) {
+				System.out.println("BEFORE EXPLODE RIGHT: "+getRootParent());
+				assert rightExpression.asTerm().isSimpleExpression();
+				int vLeft = rightExpression.asTerm().getLeftExpression().asValue().getValue();
+				int vRight = rightExpression.asTerm().getRightExpression().asValue().getValue();
+				rightExpression = new SFValue(0);
+				rightExpression.setParent(this);
+				leftExpression.propagateToRight(vLeft);
+				SFTerm parentWithNewRightChild = findParentWithNewRightChild();
+				if (parentWithNewRightChild != null) {
+					parentWithNewRightChild.getRightExpression().propagateToLeft(vRight);
+				}
+				System.out.println("AFTER EXPLODE RIGHT:  "+getRootParent());
+				changed = true;
+			}
+			return changed;
+		}
+		private SFTerm getRootParent() {
+			if (parent == null) {
+				return this;
+			}
+			return parent.getRootParent();
+		}
+		@Override protected boolean split() {
+			boolean changed = false;
+			if (leftExpression.isValue()) {
+				if (leftExpression.getValue() > 9) {
+					System.out.println("BEFORE SPLIT:         "+getRootParent());
+					int n = leftExpression.getValue();
+					leftExpression = new SFTerm(new SFValue(n/2), new SFValue((n+1)/2));
+					leftExpression.setParent(this);
+					System.out.println("AFTER SPLIT:          "+getRootParent());
+					changed = true;
+				}
+			}
+			else {
+				changed |= leftExpression.split();
+			}
+			if (rightExpression.isValue()) { 
+				if (rightExpression.getValue() > 9) {
+					int n = rightExpression.getValue();
+					rightExpression = new SFTerm(new SFValue(n/2), new SFValue((n+1)/2));
+					rightExpression.setParent(this);
+					changed = true;
+				}
+			}
+			else {
+				changed |= rightExpression.split();
+			}
+			return changed;
+		};
+		private SFTerm findParentWithNewLeftChild() {
+			if (parent == null) {
+				return null;
+			}
+			if (parent.getLeftExpression() != this) {
+				return parent;
+			}
+			return parent.findParentWithNewLeftChild();
+		}
+		private SFTerm findParentWithNewRightChild() {
+			if (parent == null) {
+				return null;
+			}
+			if (parent.getRightExpression() != this) {
+				return parent;
+			}
+			return parent.findParentWithNewRightChild();
+		}
+		@Override protected void propagateToLeft(int n) { 
+			leftExpression.propagateToLeft(n);
+		}
+		@Override protected void propagateToRight(int n) { 
+			rightExpression.propagateToRight(n);
+		}
 		@Override public String toString() { return "["+leftExpression+","+rightExpression+"]"; }
 	}
 	
@@ -96,7 +226,13 @@ public class Y21Day18 {
 	
 	public static void mainPart1() throws FileNotFoundException {
 		
+//		SFTerm testTerm = SFExpression.readTerm("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]");
+//		System.out.println(testTerm);
+//		testTerm.reduce(1);
+//		System.out.println(testTerm);
+		
 		try (Scanner scanner = new Scanner(new File("input/y21/day18example2.txt"))) {
+			SFTerm lastTerm = null;
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
 				if (line.isEmpty()) {
@@ -105,8 +241,17 @@ public class Y21Day18 {
 				if (!line.matches(INPUT_RX)) {
 					throw new RuntimeException("invalid input line '"+line+"', not matching RX '"+INPUT_RX+"'");
 				}
-				SFExpression exp = SFExpression.read(line);
-				System.out.println(line + " -> "+exp);
+				SFTerm term = SFExpression.readTerm(line);
+				if (lastTerm == null) {
+					System.out.println(term);
+					lastTerm = term;
+				}
+				else{
+					System.out.println();
+					System.out.println(lastTerm + " + " + term);
+					lastTerm = lastTerm.add(term);
+					System.out.println(" = " + lastTerm);
+				}
 			}
 		}
 	}
