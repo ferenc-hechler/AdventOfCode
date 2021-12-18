@@ -20,6 +20,7 @@ public class Y21Day18 {
 		public SFExpression getLeftExpression() { throw new UnsupportedOperationException(); }
 		public SFExpression getRightExpression() { throw new UnsupportedOperationException(); }
 		public int getValue() { throw new UnsupportedOperationException(); }
+		public int getMagnitude() { throw new UnsupportedOperationException(); }
 		public static SFTerm readTerm(String input) {
 			return read(new Tokenizer(input)).asTerm();
 		}
@@ -54,6 +55,7 @@ public class Y21Day18 {
 		public boolean isValue() { return true; }
 		protected void propagateToLeft(int n) { value += n; }
 		protected void propagateToRight(int n) { value += n; }
+		public int getMagnitude() { return value; }
 		@Override public String toString() { return ""+value; }
 	}
 	
@@ -80,9 +82,7 @@ public class Y21Day18 {
 		private void reduce() {
 			boolean changed = true;
 			while (changed) {
-//				System.out.println(this);
 				changed = explode(1);
-//				System.out.println(this);
 				if (changed) { continue; }
 				changed = split();
 			}
@@ -98,7 +98,7 @@ public class Y21Day18 {
 				return changed;
 			}
 			if (leftExpression.isTerm()) {
-				System.out.println("BEFORE EXPLODE LEFT:  "+getRootParent());
+//				System.out.println("BEFORE EXPLODE LEFT:  "+getRootParent());
 				assert leftExpression.asTerm().isSimpleExpression();
 				int vLeft = leftExpression.asTerm().getLeftExpression().asValue().getValue();
 				int vRight = leftExpression.asTerm().getRightExpression().asValue().getValue();
@@ -109,11 +109,11 @@ public class Y21Day18 {
 					parentWithNewLeftChild.getLeftExpression().propagateToRight(vLeft);
 				}
 				rightExpression.propagateToLeft(vRight);
-				System.out.println("AFTER EXPLODE LEFT:   "+getRootParent());
+//				System.out.println("AFTER EXPLODE LEFT:   "+getRootParent());
 				changed = true;
 			}
 			if (rightExpression.isTerm()) {
-				System.out.println("BEFORE EXPLODE RIGHT: "+getRootParent());
+//				System.out.println("BEFORE EXPLODE RIGHT: "+getRootParent());
 				assert rightExpression.asTerm().isSimpleExpression();
 				int vLeft = rightExpression.asTerm().getLeftExpression().asValue().getValue();
 				int vRight = rightExpression.asTerm().getRightExpression().asValue().getValue();
@@ -124,7 +124,7 @@ public class Y21Day18 {
 				if (parentWithNewRightChild != null) {
 					parentWithNewRightChild.getRightExpression().propagateToLeft(vRight);
 				}
-				System.out.println("AFTER EXPLODE RIGHT:  "+getRootParent());
+//				System.out.println("AFTER EXPLODE RIGHT:  "+getRootParent());
 				changed = true;
 			}
 			return changed;
@@ -136,32 +136,35 @@ public class Y21Day18 {
 			return parent.getRootParent();
 		}
 		@Override protected boolean split() {
-			boolean changed = false;
 			if (leftExpression.isValue()) {
 				if (leftExpression.getValue() > 9) {
-					System.out.println("BEFORE SPLIT:         "+getRootParent());
+//					System.out.println("BEFORE SPLIT:         "+getRootParent());
 					int n = leftExpression.getValue();
 					leftExpression = new SFTerm(new SFValue(n/2), new SFValue((n+1)/2));
 					leftExpression.setParent(this);
-					System.out.println("AFTER SPLIT:          "+getRootParent());
-					changed = true;
+//					System.out.println("AFTER SPLIT:          "+getRootParent());
+					return true;
 				}
 			}
 			else {
-				changed |= leftExpression.split();
+				if (leftExpression.split()) {
+					return true;
+				}
 			}
 			if (rightExpression.isValue()) { 
 				if (rightExpression.getValue() > 9) {
 					int n = rightExpression.getValue();
 					rightExpression = new SFTerm(new SFValue(n/2), new SFValue((n+1)/2));
 					rightExpression.setParent(this);
-					changed = true;
+					return true;
 				}
 			}
 			else {
-				changed |= rightExpression.split();
+				if (rightExpression.split()) {
+					return true;
+				}
 			}
-			return changed;
+			return false;
 		};
 		private SFTerm findParentWithNewLeftChild() {
 			if (parent == null) {
@@ -187,6 +190,7 @@ public class Y21Day18 {
 		@Override protected void propagateToRight(int n) { 
 			rightExpression.propagateToRight(n);
 		}
+		public int getMagnitude() { return 3*leftExpression.getMagnitude()+2*rightExpression.getMagnitude(); }
 		@Override public String toString() { return "["+leftExpression+","+rightExpression+"]"; }
 	}
 	
@@ -231,7 +235,7 @@ public class Y21Day18 {
 //		testTerm.reduce(1);
 //		System.out.println(testTerm);
 		
-		try (Scanner scanner = new Scanner(new File("input/y21/day18example2.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day18.txt"))) {
 			SFTerm lastTerm = null;
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
@@ -251,6 +255,7 @@ public class Y21Day18 {
 					System.out.println(lastTerm + " + " + term);
 					lastTerm = lastTerm.add(term);
 					System.out.println(" = " + lastTerm);
+					System.out.println("   MAG: " + lastTerm.getMagnitude());
 				}
 			}
 		}
