@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 public class Utils3D {
 	
@@ -23,6 +22,32 @@ public class Utils3D {
 		public int y() { return y; }
 		public int z() { return z; }
 		public Point3D offset(int dx, int dy, int dz) { return new Point3D(x+dx, y+dy, z+dz); }
+		public Point3D add(Point3D other) {
+			x += other.x;
+			y += other.y;
+			z += other.z;
+			return this; 
+		}
+		public Point3D sub(Point3D other) {
+			x -= other.x;
+			y -= other.y;
+			z -= other.z;
+			return this; 
+		}
+		public void set(Point3D other) {
+			x = other.x;
+			y = other.y;
+			z = other.z;
+		}
+		public double distance(Point3D other) {
+			return Math.sqrt(sqareDistance(other)); 
+		}
+		public long sqareDistance(Point3D other) {
+			return (x-other.x)*(x-other.x) + (y-other.y)*(y-other.y) + (z-other.z)*(z-other.z); 
+		}
+		public int nondiagonalDistance(Point3D other) {
+			return Math.abs(x-other.x) + Math.abs(y-other.y) + Math.abs(z-other.z); 
+		}
 		public List<Point3D> offsets(int... deltas) {
 			List<Point3D> result = new ArrayList<>();
 			for (int i=0; i<deltas.length; i+=3) {
@@ -62,9 +87,31 @@ public class Utils3D {
 		}
 		public boolean equals(int otherX, int otherY, int otherZ) { return x == otherX && y == otherY && z == otherZ; }
 		@Override public String toString() { return "("+x+","+y+","+z+")"; }
+		public Point3D createCopy() {
+			return new Point3D(this);
+		}
 	}
 
 	
+	public static class RotMatrix {
+		int[][] mat;
+		public RotMatrix() {
+			this.mat = new int[3][3];
+		}
+		public RotMatrix(int[][] mat) {
+			this.mat = mat;
+		}
+		public Point3D rot(Point3D p) {
+			int x = p.x*mat[0][0] + p.y*mat[1][0] + p.z*mat[2][0]; 
+			int y = p.x*mat[0][1] + p.y*mat[1][1] + p.z*mat[2][1]; 
+			int z = p.x*mat[0][2] + p.y*mat[1][2] + p.z*mat[2][2];
+			return new Point3D(x,y,z);
+		}
+		@Override public String toString() {
+			return Utils.toString(mat);
+		}
+	}
+
 	
 	public static class Area3D implements Iterable<Point3D> {
 		protected int minX;
