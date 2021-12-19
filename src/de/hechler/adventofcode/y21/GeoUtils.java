@@ -50,6 +50,7 @@ public class GeoUtils {
 	}
 
 	
+	
 	public static class Area implements Iterable<Point> {
 		protected int minX;
 		protected int minY;
