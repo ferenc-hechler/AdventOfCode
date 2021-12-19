@@ -23,6 +23,7 @@ public class Y21Day19 {
 
 	public static class AOCScanner {
 		private int id;
+		private Point3D moved = new Point3D();
 		private List<Point3D> relBeaconPosList;
 		public AOCScanner(int id) {
 			this.id = id;
@@ -33,7 +34,7 @@ public class Y21Day19 {
 		}
 		public List<Integer> calcDistances(Point3D centerPoint) {
 			final List<Integer> result = new ArrayList<>();
-			relBeaconPosList.forEach(p -> result.add(centerPoint.nondiagonalDistance(p)));
+			relBeaconPosList.forEach(p -> result.add(centerPoint.manhattenDistance(p)));
 			return result;
 		}
 		public List<Point3D> getRelBeaconPosList() {
@@ -41,6 +42,7 @@ public class Y21Day19 {
 		}
 		public AOCScanner createCopy() {
 			AOCScanner result = new AOCScanner(id);
+			result.moved = moved.createCopy();
 			for (Point3D relBeacon:relBeaconPosList) {
 				result.addBeacon(relBeacon.createCopy());
 			}
@@ -48,6 +50,7 @@ public class Y21Day19 {
 		}
 		public void offset(Point3D offs) {
 			relBeaconPosList.forEach(p -> p.add(offs));
+			moved.add(offs);
 		}
 		@Override public String toString() {
 			final StringBuilder result = new StringBuilder();
@@ -58,6 +61,7 @@ public class Y21Day19 {
 		}
 		public void rot(RotMatrix rmat) {
 			relBeaconPosList.forEach(p -> p.set(rmat.rot(p)));
+			moved = rmat.rot(moved);
 		}
 	}
 	
@@ -151,6 +155,8 @@ public class Y21Day19 {
 								scrB3.rot(rmat);
 								// move origin to relBeaconA
 								scrB3.offset(relBeaconA);
+								
+								int dist = relBeaconB.manhattenDistance(relBeaconB);
 								// check how many identical relBeacons are in both scanners
 								List<Point3D> beaconsB = new ArrayList<>(scrB3.getRelBeaconPosList());
 								beaconsB.retainAll(scrA.getRelBeaconPosList());
@@ -190,9 +196,72 @@ public class Y21Day19 {
 	}
 
 
+	public static void mainPart2() throws FileNotFoundException {
+
+		try (Scanner scanner = new Scanner(new File("input/y21/day19.txt"))) {
+			List<AOCScanner> scrs = new ArrayList<>();
+			while (scanner.hasNext()) {
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty()) {
+					continue;
+				}
+				if (!line.matches(INPUT_RX1)) {
+					throw new RuntimeException("invalid input line '"+line+"', not matching RX1 '"+INPUT_RX1+"'");
+				}
+				int scannerID = Integer.parseInt(line.replaceFirst(INPUT_RX1, "$1"));
+				System.out.println();
+				AOCScanner scr = new AOCScanner(scannerID);
+				while (scanner.hasNext()) {
+					line = scanner.nextLine().trim();
+					if (line.isEmpty()) {
+						break;
+					}
+					if (!line.matches(INPUT_RX2)) {
+						throw new RuntimeException("invalid input line '"+line+"', not matching RX2 '"+INPUT_RX2+"'");
+					}
+					int x=Integer.parseInt(line.replaceFirst(INPUT_RX2, "$1"));
+					int y=Integer.parseInt(line.replaceFirst(INPUT_RX2, "$2"));
+					int z=Integer.parseInt(line.replaceFirst(INPUT_RX2, "$3"));
+					scr.addBeacon(new Point3D(x, y, z));
+				}
+				System.out.println(scr);
+				scrs.add(scr);
+			}
+			List<AOCScanner> known = new ArrayList<>();
+			List<AOCScanner> unknown = new ArrayList<>(scrs);
+			known.add(scrs.get(0));
+			unknown.remove(scrs.get(0));
+			while (unknown.size()>0) {
+				OUTER:
+				for (AOCScanner scrU:unknown) {
+					for (AOCScanner scrK:known) {
+						AOCScanner scrTransposed = compare(scrK, scrU);
+						if (scrTransposed != null) {
+							known.add(scrTransposed);
+							unknown.remove(scrU);
+							break OUTER;
+						}
+					}
+				}
+			}
+			Set<Point3D> allBeacons = new HashSet<>();
+			List<Point3D> scannerPositions = new ArrayList<>();
+			for (AOCScanner scrK:known) {
+				allBeacons.addAll(scrK.getRelBeaconPosList());
+				scannerPositions.add(scrK.moved);
+			}
+			int bestDist = 0;
+			for (Point3D scrPosA:scannerPositions) {
+				for (Point3D scrPosB:scannerPositions) {
+					bestDist = Math.max(bestDist, scrPosA.manhattenDistance(scrPosB));
+				}
+			}
+			System.out.println("MAX DIST: "+bestDist);
+		}
+	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	

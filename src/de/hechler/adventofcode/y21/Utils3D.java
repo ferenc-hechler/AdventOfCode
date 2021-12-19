@@ -45,7 +45,7 @@ public class Utils3D {
 		public long sqareDistance(Point3D other) {
 			return (x-other.x)*(x-other.x) + (y-other.y)*(y-other.y) + (z-other.z)*(z-other.z); 
 		}
-		public int nondiagonalDistance(Point3D other) {
+		public int manhattenDistance(Point3D other) {
 			return Math.abs(x-other.x) + Math.abs(y-other.y) + Math.abs(z-other.z); 
 		}
 		public List<Point3D> offsets(int... deltas) {
