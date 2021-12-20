@@ -21,7 +21,7 @@ public class Y21Day20 {
 	private final static String INPUT_RX1 = "^([.#]{512})$";
 	private final static String INPUT_RX2 = "^([.#]+)$";
 
-	public static void mainPart1() throws FileNotFoundException {
+	public static void mainPart2() throws FileNotFoundException {
 
 		try (Scanner scanner = new Scanner(new File("input/y21/day20.txt"))) {
 			while (scanner.hasNext()) {
@@ -106,7 +106,7 @@ public class Y21Day20 {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-		mainPart1();
+		mainPart2();
 	}
 
 	
