@@ -47,7 +47,7 @@ public class Y21Day20 {
 					}
 					inputLines.add(line);
 				}
-				int countIterations = 2;
+				int countIterations = 50;
 				int border = countIterations+1;
 				int height = inputLines.size();
 				int width = inputLines.get(0).length();
@@ -59,7 +59,7 @@ public class Y21Day20 {
 					}
 				}
 				System.out.println(Utils.toString(world, ""));
-				for (int step=1; step<=2; step++) {
+				for (int step=1; step<=countIterations; step++) {
 					infiniteValue = alg[511*infiniteValue];
 					world = calcNextTick(world, alg);
 					fillBorder(world, infiniteValue);
