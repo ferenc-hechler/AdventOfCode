@@ -40,8 +40,8 @@ public class Y21Day22 {
 			return factor*(maxX-minX+1)*(maxY-minY+1)*(maxZ-minZ+1);
 		}
 		public boolean overlaps(Cube other) {
-			return  (maxX>other.minX)&&(maxY>other.minY)&&(maxZ>other.minZ) && 
-					(minX<other.maxX)&&(minY<other.maxY)&&(minZ<other.maxZ); 
+			return  (maxX>=other.minX)&&(maxY>=other.minY)&&(maxZ>=other.minZ) && 
+					(minX<=other.maxX)&&(minY<=other.maxY)&&(minZ<=other.maxZ); 
 		}
 		public Cube intersect(Cube other, long factor) {
 			if (!overlaps(other)) {
@@ -64,7 +64,7 @@ public class Y21Day22 {
 
 		List<Cube> cubes = new ArrayList<>();  
 		
-		try (Scanner scanner = new Scanner(new File("input/y21/day22.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day22example2.txt"))) {
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
 				if (line.isEmpty()) {
