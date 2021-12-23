@@ -33,6 +33,7 @@ public class Y21Day23 {
 	
 	public static class World {
 		private int[] field;
+		private int costs;
 
 		private final static int[][] MOVES_SIDEROOM_TO_FLOOR = {
 				{11, 2, 1, 0},
@@ -115,22 +116,11 @@ public class Y21Day23 {
 		}
 		
 
-		public World(int[] field) {
+		public World(int costs, int[] field) {
+			this.costs = costs;
 			this.field = field;
 		}
 		
-		public World(int f11, int f12, int f13, int f14, 
-					 int f15, int f16, int f17, int f18) {
-			field = new int[19];
-			field[11] = f11;
-			field[12] = f12;
-			field[13] = f13;
-			field[14] = f14;
-			field[15] = f15;
-			field[16] = f16;
-			field[17] = f17;
-			field[18] = f18;
-		}
 		public boolean isFinished() {
 			return (field[11] == 1) && (field[15] == 1) && 
 				   (field[12] == 2) && (field[16] == 2) && 
@@ -163,7 +153,7 @@ public class Y21Day23 {
 							}
 						}
 					}
-				else if (field[i]!=player) {
+				else if ((field[i]!=player) || (field[i+4]!=player)) {
 					// bottom field can be moved
 					for (int f=0; f<=10; f++) {
 						if (field[f] == 0) {
@@ -222,12 +212,16 @@ public class Y21Day23 {
 			return true;
 		}
 
+		private final static int[] MOVE_COSTS = {0, 1, 10, 100, 1000};
+		
 		private World createMove(int from, int to) {
 			int[] movedField = new int[field.length];
 			System.arraycopy(field, 0, movedField, 0, field.length);
+			int player = movedField[from]; 
 			movedField[from] = 0; 
-			movedField[to] = field[from]; 
-			return new World(movedField);
+			movedField[to] = player; 
+			int moveCosts = MOVE_COSTS[player]*(source2targetMap.get(from*100+to).length-1);
+			return new World(costs+moveCosts, movedField);
 		}
 
 		private final static String[] p = {".", "A", "B", "C", "D"};
@@ -257,67 +251,77 @@ public class Y21Day23 {
 			result.append("  #########\r\n");
 			return result.toString();
 		}
+
+
+		public int getCosts() {
+			return costs;
+		}
 	}
 	
 	public static void mainPart1() throws FileNotFoundException {
 
-		try (Scanner scanner = new Scanner(new File("input/y21/day23example2.txt"))) {
-			while (scanner.hasNext()) {
-				String line = scanner.nextLine();
-				if (!line.matches(INPUT_RX1)) {
-					throw new RuntimeException("invalid input line '"+line+"', not matching RX1 '"+INPUT_RX1+"'");
-				}
-				line = scanner.nextLine();
-				if (!line.matches(INPUT_RX2)) {
-					throw new RuntimeException("invalid input line '"+line+"', not matching RX2 '"+INPUT_RX2+"'");
-				}
-				int[] field = new int[19];
-				String floorPlayers = line.replaceFirst(INPUT_RX2, "$1");
-				for (int i=0; i<=10; i++) {
-					field[i] = World.PLAYERNUMS.indexOf(floorPlayers.charAt(i));
-				}
-				line = scanner.nextLine();
-				if (!line.matches(INPUT_RX3)) {
-					throw new RuntimeException("invalid input line '"+line+"', not matching RX3 '"+INPUT_RX3+"'");
-				}
-				field[11] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$1").charAt(0));
-				field[12] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$2").charAt(0));
-				field[13] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$3").charAt(0));
-				field[14] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$4").charAt(0));
-				line = scanner.nextLine();
-				if (!line.matches(INPUT_RX4)) {
-					throw new RuntimeException("invalid input line '"+line+"', not matching RX4 '"+INPUT_RX4+"'");
-				}
-				field[15] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$1").charAt(0));
-				field[16] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$2").charAt(0));
-				field[17] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$3").charAt(0));
-				field[18] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$4").charAt(0));
-				line = scanner.nextLine();
-				if (!line.matches(INPUT_RX5)) {
-					throw new RuntimeException("invalid input line '"+line+"', not matching RX5 '"+INPUT_RX4+"'");
-				}
+		try (Scanner scanner = new Scanner(new File("input/y21/day23.txt"))) {
+			String line = scanner.nextLine();
+			if (!line.matches(INPUT_RX1)) {
+				throw new RuntimeException("invalid input line '"+line+"', not matching RX1 '"+INPUT_RX1+"'");
+			}
+			line = scanner.nextLine();
+			if (!line.matches(INPUT_RX2)) {
+				throw new RuntimeException("invalid input line '"+line+"', not matching RX2 '"+INPUT_RX2+"'");
+			}
+			int[] field = new int[19];
+			String floorPlayers = line.replaceFirst(INPUT_RX2, "$1");
+			for (int i=0; i<=10; i++) {
+				field[i] = World.PLAYERNUMS.indexOf(floorPlayers.charAt(i));
+			}
+			line = scanner.nextLine();
+			if (!line.matches(INPUT_RX3)) {
+				throw new RuntimeException("invalid input line '"+line+"', not matching RX3 '"+INPUT_RX3+"'");
+			}
+			field[11] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$1").charAt(0));
+			field[12] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$2").charAt(0));
+			field[13] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$3").charAt(0));
+			field[14] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$4").charAt(0));
+			line = scanner.nextLine();
+			if (!line.matches(INPUT_RX4)) {
+				throw new RuntimeException("invalid input line '"+line+"', not matching RX4 '"+INPUT_RX4+"'");
+			}
+			field[15] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$1").charAt(0));
+			field[16] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$2").charAt(0));
+			field[17] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$3").charAt(0));
+			field[18] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$4").charAt(0));
+			line = scanner.nextLine();
+			if (!line.matches(INPUT_RX5)) {
+				throw new RuntimeException("invalid input line '"+line+"', not matching RX5 '"+INPUT_RX4+"'");
+			}
 
 //				System.out.println("INPUT: "+amber1+","+bronce1+","+copper1+","+desert1);
 //				System.out.println("       "+amber2+","+bronce2+","+copper2+","+desert2);
 //				
-				World world = new World(field);
-				System.out.println(world.toString());
-				
-				List<World> nextMoves = world.calcNextMoves();
-				
-				while (!nextMoves.isEmpty()) {
-					System.out.println("NEXT: "+nextMoves.size());
-					List<World> currentMoves = nextMoves;
-					nextMoves = new ArrayList<>();
-					for (World currentWorld:currentMoves) {
-						System.out.println(currentWorld);
+			World world = new World(0, field);
+			System.out.println(world.toString());
+			
+			List<World> nextMoves = world.calcNextMoves();
+			int bestCosts = Integer.MAX_VALUE;
+			while (!nextMoves.isEmpty()) {
+				System.out.println("NEXT: "+nextMoves.size());
+				List<World> currentMoves = nextMoves;
+				nextMoves = new ArrayList<>();
+				for (World currentWorld:currentMoves) {
+//					System.out.println(currentWorld);
+					if (currentWorld.isFinished()) {
+						int costs = currentWorld.getCosts();
+						if (costs < bestCosts) {
+							bestCosts = costs;
+							System.out.println(bestCosts);
+						}
+					}
+					else {
 						nextMoves.addAll(currentWorld.calcNextMoves());
 					}
 				}
 			}
-			
-			
-			
+			System.out.println("BEST: "+bestCosts);
 		}
 	}
 
