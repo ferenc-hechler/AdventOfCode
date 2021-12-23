@@ -181,6 +181,9 @@ public class Y21Day23p2 {
 		private void addAllMovesToFloor(List<World> result) {
 			for (int sideway=1; sideway<=4; sideway++) {
 				int firstNonFree = findFirstMovable(sideway);
+				if (firstNonFree == -1) {
+					continue;
+				}
 				if (field[firstNonFree] == sideway) {
 					int target = targetForPlayer(sideway);
 					if ((target == -1) || (firstNonFree >= target)) {
@@ -300,7 +303,7 @@ public class Y21Day23p2 {
 	
 	public static void mainPart2() throws FileNotFoundException {
 
-		try (Scanner scanner = new Scanner(new File("input/y21/day23p2example2.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day23p2.txt"))) {
 			String line = scanner.nextLine();
 			if (!line.matches(INPUT_RX1)) {
 				throw new RuntimeException("invalid input line '"+line+"', not matching RX1 '"+INPUT_RX1+"'");
