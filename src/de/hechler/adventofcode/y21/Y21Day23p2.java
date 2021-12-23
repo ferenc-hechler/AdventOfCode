@@ -179,58 +179,44 @@ public class Y21Day23p2 {
 		}
 		
 		private void addAllMovesToFloor(List<World> result) {
-			// if bottom is free move there 
-			for (int i=11; i<=14; i++) {
-				int player = i-10;
-				if (field[i]==0) {
-					// inner field is empty check bottom
-					int j = i+4;
-					if ((field[j]!=player) && (field[j]!=0)) {
-						for (int f=0; f<=10; f++) {
-								if (checkMove(j, f)) {
-									result.add(createMove(j, f));
-								}
-							}
-						}
+			for (int sideway=1; sideway<=4; sideway++) {
+				int firstNonFree = findFirstMovable(sideway);
+				if (field[firstNonFree] == sideway) {
+					int target = targetForPlayer(sideway);
+					if ((target == -1) || (firstNonFree >= target)) {
+						// already at target position, nothing to do...
+						continue;
 					}
-				else if ((field[i]!=player) || (field[i+4]!=player)) {
-					// bottom field can be moved
-					for (int f=0; f<=10; f++) {
-						if (field[f] == 0) {
-							if (checkMove(i, f)) {
-								result.add(createMove(i, f));
-							}
-						}
+				}
+				for (int i=0; i<=10; i++) {
+					if (checkMove(firstNonFree, i)) {
+						result.add(createMove(firstNonFree, i));
 					}
 				}
 			}
 		}
 			
+		private int findFirstMovable(int sideway) {
+			for (int pos=10+sideway; pos<=26; pos+=4) {
+				if (field[pos] != 0) {
+					return pos;
+				}
+			}
+			return -1;
+		}
+
+
 		private void addMovesToTarget(List<World> result) {
 			// if bottom is free move there 
-			for (int i=15; i<=18; i++) {
-				int player = i-14;
-				if (field[i]==0) {
-					for (int f=0; f<=10; f++) {
-						if (field[f] == player) {
-							if (checkMove(f, i)) {
-								result.add(createMove(f, i));
-							}
-						}
-					}
+			for (int i=0; i<=10; i++) {
+				int player = field[i];
+				if (player == 0) {
+					continue;
 				}
-				else if (field[i]==player) {
-					// bottom is filled with correct player, check second level
-					int j = i-4;
-					if (field[j]==0) {
-						for (int f=0; f<=10; f++) {
-							if (field[f] == player) {
-								if (checkMove(f, j)) {
-									result.add(createMove(f, j));
-								}
-							}
-						}
-					}
+				int target = targetForPlayer(player);
+				if (checkMove(i, target)) {
+					result.add(createMove(i, target));
+					return;
 				}
 			}
 		}
@@ -245,7 +231,7 @@ public class Y21Day23p2 {
 				return false;
 			}
 			for (int i=1; i<way.length; i++) {
-				if (field[i] != 0) {
+				if (field[way[i]] != 0) {
 					return false;
 				}
 			}
@@ -385,7 +371,7 @@ public class Y21Day23p2 {
 						int costs = currentWorld.getCosts();
 						if (costs < bestCosts) {
 							bestCosts = costs;
-							System.out.println(bestCosts);
+							System.out.println(bestCosts+ " - "+currentWorld.minSolveCosts);
 						}
 					}
 					else {
