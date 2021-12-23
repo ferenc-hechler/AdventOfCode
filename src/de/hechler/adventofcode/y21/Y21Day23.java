@@ -3,12 +3,10 @@ package de.hechler.adventofcode.y21;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
-
-import de.hechler.adventofcode.y21.Utils3D.Point3D;
 
 /**
  * see: https://adventofcode.com/2021/day/3
@@ -101,6 +99,20 @@ public class Y21Day23 {
 				{18, 14, 8, 9},
 				{18, 14, 8, 9, 10},
 		};
+		private static Map<Integer, int[]> floor2targetMap;
+		private static void fillFloor2targetMap() {
+			floor2targetMap = new HashMap<>();
+			for (int[] moveToFloor:MOVES_SIDEROOM_TO_FLOOR) {
+				int floor = moveToFloor[moveToFloor.length-1];
+				int sideway= moveToFloor[0];
+				int[] way = new int[moveToFloor.length];
+				for (int i=0; i<moveToFloor.length; i++) {
+					way[i] = moveToFloor[moveToFloor.length-1-i];
+				}
+				floor2targetMap.put(floor*100+sideway, way); 
+			}
+		}
+		
 
 		public World(int[] field) {
 			this.field = field;
@@ -147,18 +159,61 @@ public class Y21Day23 {
 						continue OUTER;
 					}
 				}
-				int[] movedField = new int[field.length];
-				System.arraycopy(field, 0, movedField, 0, field.length);
-				movedField[moveToFloor[0]] = 0; 
-				movedField[moveToFloor[moveToFloor.length-1]] = player; 
-				World movedWorld = new World(movedField); 
-				result.add(movedWorld);
+				result.add(createMove(moveToFloor[0], moveToFloor[moveToFloor.length-1]));
 			}
 		}
 		private void addMovesToTarget(List<World> result) {
+			// if bottom is free move there 
+			for (int i=15; i<18; i++) {
+				int player = i-14;
+				if (field[i]==0) {
+					for (int f=0; f<10; f++) {
+						if (field[f] == player) {
+							if (checkMove(f, i)) {
+								result.add(createMove(f, i));
+							}
+						}
+					}
+				}
+				else if (field[i]==player) {
+					// bottom is filled with correct player, check second level
+					int j = i-4;
+					if (field[j]==0) {
+						for (int f=0; f<10; f++) {
+							if (field[f] == player) {
+								if (checkMove(f, j)) {
+									result.add(createMove(f, j));
+								}
+							}
+						}
+					}
+				}
+			}
 			return;
 		}
+
+		private int playerForTarget(int target) {
+			return ((target+1)%4)+1;
+		}
 		
+		private boolean checkMove(int fromFloor, int toSideroom) {
+			int[] way = floor2targetMap.get(fromFloor*100+toSideroom);
+			for (int i=1; i<way.length; i++) {
+				if (field[i] != 0) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private World createMove(int from, int to) {
+			int[] movedField = new int[field.length];
+			System.arraycopy(field, 0, movedField, 0, field.length);
+			movedField[from] = 0; 
+			movedField[to] = field[from]; 
+			return new World(movedField);
+		}
+
 		private final String[] p = {".", "A", "B", "C", "D"};
 		
 		@Override
@@ -227,9 +282,13 @@ public class Y21Day23 {
 				System.out.println(world.toString());
 				
 				List<World> nextMoves = world.calcNextMoves();
-				System.out.println("NEXT: "+nextMoves.size());
-				for (World nextMove:nextMoves) {
-					System.out.println(nextMove);
+				while (!nextMoves.isEmpty()) {
+					System.out.println("NEXT: "+nextMoves.size());
+					List<World> currentMoves = nextMoves;
+					nextMoves = new ArrayList<>();
+					for (World currentWorld:currentMoves) {
+						nextMoves.addAll(currentWorld.calcNextMoves());
+					}
 				}
 			}
 			
@@ -239,6 +298,7 @@ public class Y21Day23 {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
+		World.fillFloor2targetMap();
 		mainPart1();
 	}
 
