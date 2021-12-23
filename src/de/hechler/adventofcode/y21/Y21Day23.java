@@ -15,9 +15,9 @@ import java.util.Scanner;
 public class Y21Day23 {
 
 	private final static String INPUT_RX1 = "^#############$";
-	private final static String INPUT_RX2 = "^#...........#$";
-	private final static String INPUT_RX3 = "^###([A-D])#([A-D])#([A-D])#([A-D])###$";
-	private final static String INPUT_RX4 = "^  #([A-D])#([A-D])#([A-D])#([A-D])#$";
+	private final static String INPUT_RX2 = "^#([A-D.]{11})#$";
+	private final static String INPUT_RX3 = "^###([A-D.])#([A-D.])#([A-D.])#([A-D.])###$";
+	private final static String INPUT_RX4 = "^  #([A-D.])#([A-D.])#([A-D.])#([A-D.])#$";
 	private final static String INPUT_RX5 = "^  #########$";
 
 	
@@ -99,17 +99,18 @@ public class Y21Day23 {
 				{18, 14, 8, 9},
 				{18, 14, 8, 9, 10},
 		};
-		private static Map<Integer, int[]> floor2targetMap;
-		private static void fillFloor2targetMap() {
-			floor2targetMap = new HashMap<>();
+		private static Map<Integer, int[]> source2targetMap;
+		private static void fillSource2targetMap() {
+			source2targetMap = new HashMap<>();
 			for (int[] moveToFloor:MOVES_SIDEROOM_TO_FLOOR) {
 				int floor = moveToFloor[moveToFloor.length-1];
 				int sideway= moveToFloor[0];
+				source2targetMap.put(sideway*100+floor, moveToFloor);
 				int[] way = new int[moveToFloor.length];
 				for (int i=0; i<moveToFloor.length; i++) {
 					way[i] = moveToFloor[moveToFloor.length-1-i];
 				}
-				floor2targetMap.put(floor*100+sideway, way); 
+				source2targetMap.put(floor*100+sideway, way); 
 			}
 		}
 		
@@ -148,26 +149,39 @@ public class Y21Day23 {
 		}
 		
 		private void addAllMovesToFloor(List<World> result) {
-			OUTER:
-			for (int[] moveToFloor:MOVES_SIDEROOM_TO_FLOOR) {
-				int player = field[moveToFloor[0]]; 
-				if (player == 0) {
-					continue;
-				}
-				for (int i=1; i<moveToFloor.length; i++) {
-					if (field[moveToFloor[i]] != 0) {
-						continue OUTER;
+			// if bottom is free move there 
+			for (int i=11; i<=14; i++) {
+				int player = i-10;
+				if (field[i]==0) {
+					// inner field is empty check bottom
+					int j = i+4;
+					if ((field[j]!=player) && (field[j]!=0)) {
+						for (int f=0; f<=10; f++) {
+								if (checkMove(j, f)) {
+									result.add(createMove(j, f));
+								}
+							}
+						}
+					}
+				else if (field[i]!=player) {
+					// bottom field can be moved
+					for (int f=0; f<=10; f++) {
+						if (field[f] == 0) {
+							if (checkMove(i, f)) {
+								result.add(createMove(i, f));
+							}
+						}
 					}
 				}
-				result.add(createMove(moveToFloor[0], moveToFloor[moveToFloor.length-1]));
 			}
 		}
+			
 		private void addMovesToTarget(List<World> result) {
 			// if bottom is free move there 
-			for (int i=15; i<18; i++) {
+			for (int i=15; i<=18; i++) {
 				int player = i-14;
 				if (field[i]==0) {
-					for (int f=0; f<10; f++) {
+					for (int f=0; f<=10; f++) {
 						if (field[f] == player) {
 							if (checkMove(f, i)) {
 								result.add(createMove(f, i));
@@ -179,7 +193,7 @@ public class Y21Day23 {
 					// bottom is filled with correct player, check second level
 					int j = i-4;
 					if (field[j]==0) {
-						for (int f=0; f<10; f++) {
+						for (int f=0; f<=10; f++) {
 							if (field[f] == player) {
 								if (checkMove(f, j)) {
 									result.add(createMove(f, j));
@@ -189,15 +203,17 @@ public class Y21Day23 {
 					}
 				}
 			}
-			return;
 		}
 
 		private int playerForTarget(int target) {
 			return ((target+1)%4)+1;
 		}
 		
-		private boolean checkMove(int fromFloor, int toSideroom) {
-			int[] way = floor2targetMap.get(fromFloor*100+toSideroom);
+		private boolean checkMove(int source, int target) {
+			int[] way = source2targetMap.get(source*100+target);
+			if (way==null) {
+				return false;
+			}
 			for (int i=1; i<way.length; i++) {
 				if (field[i] != 0) {
 					return false;
@@ -214,7 +230,8 @@ public class Y21Day23 {
 			return new World(movedField);
 		}
 
-		private final String[] p = {".", "A", "B", "C", "D"};
+		private final static String[] p = {".", "A", "B", "C", "D"};
+		private final static String PLAYERNUMS = ".ABCD";
 		
 		@Override
 		public String toString() {
@@ -244,7 +261,7 @@ public class Y21Day23 {
 	
 	public static void mainPart1() throws FileNotFoundException {
 
-		try (Scanner scanner = new Scanner(new File("input/y21/day23example.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day23example2.txt"))) {
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine();
 				if (!line.matches(INPUT_RX1)) {
@@ -254,22 +271,27 @@ public class Y21Day23 {
 				if (!line.matches(INPUT_RX2)) {
 					throw new RuntimeException("invalid input line '"+line+"', not matching RX2 '"+INPUT_RX2+"'");
 				}
+				int[] field = new int[19];
+				String floorPlayers = line.replaceFirst(INPUT_RX2, "$1");
+				for (int i=0; i<=10; i++) {
+					field[i] = World.PLAYERNUMS.indexOf(floorPlayers.charAt(i));
+				}
 				line = scanner.nextLine();
 				if (!line.matches(INPUT_RX3)) {
 					throw new RuntimeException("invalid input line '"+line+"', not matching RX3 '"+INPUT_RX3+"'");
 				}
-				int amber1  = line.replaceFirst(INPUT_RX3, "$1").charAt(0)-'A'+1;
-				int bronce1 = line.replaceFirst(INPUT_RX3, "$2").charAt(0)-'A'+1;
-				int copper1 = line.replaceFirst(INPUT_RX3, "$3").charAt(0)-'A'+1;
-				int desert1 = line.replaceFirst(INPUT_RX3, "$4").charAt(0)-'A'+1;
+				field[11] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$1").charAt(0));
+				field[12] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$2").charAt(0));
+				field[13] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$3").charAt(0));
+				field[14] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX3, "$4").charAt(0));
 				line = scanner.nextLine();
 				if (!line.matches(INPUT_RX4)) {
 					throw new RuntimeException("invalid input line '"+line+"', not matching RX4 '"+INPUT_RX4+"'");
 				}
-				int amber2  = line.replaceFirst(INPUT_RX4, "$1").charAt(0)-'A'+1;
-				int bronce2 = line.replaceFirst(INPUT_RX4, "$2").charAt(0)-'A'+1;
-				int copper2 = line.replaceFirst(INPUT_RX4, "$3").charAt(0)-'A'+1;
-				int desert2 = line.replaceFirst(INPUT_RX4, "$4").charAt(0)-'A'+1;
+				field[15] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$1").charAt(0));
+				field[16] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$2").charAt(0));
+				field[17] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$3").charAt(0));
+				field[18] = World.PLAYERNUMS.indexOf(line.replaceFirst(INPUT_RX4, "$4").charAt(0));
 				line = scanner.nextLine();
 				if (!line.matches(INPUT_RX5)) {
 					throw new RuntimeException("invalid input line '"+line+"', not matching RX5 '"+INPUT_RX4+"'");
@@ -278,15 +300,17 @@ public class Y21Day23 {
 //				System.out.println("INPUT: "+amber1+","+bronce1+","+copper1+","+desert1);
 //				System.out.println("       "+amber2+","+bronce2+","+copper2+","+desert2);
 //				
-				World world = new World(amber1, bronce1, copper1, desert1, amber2, bronce2, copper2, desert2);
+				World world = new World(field);
 				System.out.println(world.toString());
 				
 				List<World> nextMoves = world.calcNextMoves();
+				
 				while (!nextMoves.isEmpty()) {
 					System.out.println("NEXT: "+nextMoves.size());
 					List<World> currentMoves = nextMoves;
 					nextMoves = new ArrayList<>();
 					for (World currentWorld:currentMoves) {
+						System.out.println(currentWorld);
 						nextMoves.addAll(currentWorld.calcNextMoves());
 					}
 				}
@@ -298,7 +322,7 @@ public class Y21Day23 {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-		World.fillFloor2targetMap();
+		World.fillSource2targetMap();
 		mainPart1();
 	}
 
