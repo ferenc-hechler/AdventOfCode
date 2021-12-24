@@ -24,7 +24,7 @@ public class Y21Day24 {
 				+ "  int z=0;\n"
 				+ "  int i=0;\n"
 			);
-		try (Scanner scanner = new Scanner(new File("input/y21/day24example.txt"))) {
+		try (Scanner scanner = new Scanner(new File("input/y21/day24.txt"))) {
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine().trim();
 				if (line.isEmpty()) {
