@@ -302,6 +302,10 @@ public class Y21Day24Simulator {
 		for (int i=0; i<14; i++) {
 			input[i] = 9;
 		}
+		input[2] = 2;
+		input[3] = 2;
+		input[4] = 9;
+		input[5] = 6;
 		int cnt = 0;
 		boolean valid = aluSimulator();
 		while (!valid) {
