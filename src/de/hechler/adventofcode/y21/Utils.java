@@ -258,6 +258,23 @@ public class Utils {
 		return result.toString();
 	}
 
+	public static String toString(char[][] charMatrix) {
+		return toString(charMatrix, "");
+	}
+
+	public static String toString(char[][] charMatrix, String seperator) {
+		StringBuilder result = new StringBuilder();
+		for (char[] row: charMatrix) {
+			String sep = "";
+			for (char c: row) {
+				result.append(sep).append(c);
+				sep = seperator;
+			}
+			result.append("\n");
+		}
+		return result.toString();
+	}
+
 	public static long sum(long[] values) {
 		long result = 0;
 		for (long value:values) {

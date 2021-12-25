@@ -59,11 +59,52 @@ public class Y21Day24SearchCode {
 		return null;
 	}
 
+	public static List<Integer> monadSmall(int step, int z) {
+		if (step == 14) {
+			if (z==0) {
+				return new ArrayList<>();
+			}
+			return null;
+		}
+		int[] args = ARGS_LIST[step];
+		int m = (z%26)+args[1];
+		if ((m>=1) && (m<=9)) {
+			z=(z/args[0]);
+			List<Integer> result = monadSmall(step+1, z);
+			if (result != null) {
+				result.add(0, m);
+			}
+			return result;
+		}
+		for (int w=1; w<=9; w++) {
+			if (step <= 2) {
+				System.out.println("   ".substring(0, step)+w);
+			}
+			int y = w+args[2];
+			int z2=(z/args[0])*26+y;
+			List<Integer> result = monadSmall(step+1, z2);
+			if (result != null) {
+				result.add(0, w);
+				return result;
+			}
+		}
+		return null;
+	}
 
 
-	public static void main(String[] args) {
+
+	public static void mainPart1() {
 		List<Integer> result = monad(0, 0);
 		System.out.println(result);
+	}
+
+	public static void mainPart2() {
+		List<Integer> result = monadSmall(0, 0);
+		System.out.println(result);
+	}
+
+	public static void main(String[] args) {
+		mainPart2();
 	}
 
 }
