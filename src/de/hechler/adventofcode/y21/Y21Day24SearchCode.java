@@ -4,7 +4,7 @@ package de.hechler.adventofcode.y21;
  * see: https://adventofcode.com/2021/day/22
  *
  */
-public class Y21Day24Simulator {
+public class Y21Day24SearchCode {
 
 	public static int[] input = null;
 
@@ -56,6 +56,7 @@ public class Y21Day24Simulator {
 		y = add(y, 12);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -74,6 +75,7 @@ public class Y21Day24Simulator {
 		y = add(y, 8);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -92,6 +94,7 @@ public class Y21Day24Simulator {
 		y = add(y, 7);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -110,6 +113,7 @@ public class Y21Day24Simulator {
 		y = add(y, 4);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -128,6 +132,7 @@ public class Y21Day24Simulator {
 		y = add(y, 4);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -146,6 +151,7 @@ public class Y21Day24Simulator {
 		y = add(y, 1);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -164,6 +170,7 @@ public class Y21Day24Simulator {
 		y = add(y, 10);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -182,6 +189,7 @@ public class Y21Day24Simulator {
 		y = add(y, 8);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -200,6 +208,7 @@ public class Y21Day24Simulator {
 		y = add(y, 12);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -218,6 +227,7 @@ public class Y21Day24Simulator {
 		y = add(y, 10);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -236,6 +246,7 @@ public class Y21Day24Simulator {
 		y = add(y, 15);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -254,6 +265,7 @@ public class Y21Day24Simulator {
 		y = add(y, 4);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -272,6 +284,7 @@ public class Y21Day24Simulator {
 		y = add(y, 10);
 		y = mul(y, x);
 		z = add(z, y);
+		result(w,x,y,z);
 		w = inp(i++);
 		x = mul(x, 0);
 		x = add(x, z);
@@ -298,18 +311,11 @@ public class Y21Day24Simulator {
 	}
 
 	public static void run() {
-		input = new int[] {9,9,9,9,9,9,9,9,9,9,9,9,9,9};
+		input = new int[] {2, 6, 1, 8, 1, 1, 1, 1, 6, 4, 1, 6, 2, 1};
 		int cnt = 0;
 		boolean valid = aluSimulator();
-		while (!valid) {
-			decrementInput(); 
-			valid = aluSimulator();
-			if (cnt++ >= 10000000) {
-				cnt = 0;
-				System.out.println(Utils.toList(input));
-			}
-		}
 		System.out.println(Utils.toList(input));
+		System.out.println(valid);
 	}
 
 	private static void decrementInput() {
