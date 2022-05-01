@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import de.hechler.adventofcode.y21.GeoUtils.Point;
 
@@ -275,12 +278,16 @@ public class PathFinder {
 	private static void show(int[][] matrix, int len) {
 		for (int row=0; row<matrix.length; row++) {
 			for (int col=0; col<matrix[row].length; col++) {
-				System.out.print(padl(matrix[row][col], len));
+				if (matrix[row][col] == Integer.MAX_VALUE) {
+					System.out.print(" ********************".substring(0, len));
+				}
+				else {
+					System.out.print(padl(matrix[row][col], len));
+				}
 			}
 			System.out.println();
 		}
 	}
-
 	
 	private static String padl(int n, int len) {
 		String result = Integer.toString(n);
@@ -290,26 +297,6 @@ public class PathFinder {
 		}
 		return "               ".substring(0, len-rLen)+result;
 	}
-
-
-	public static void main(String[] args) throws IOException {
-
-		int[][] matrix = readMatrix("input/pathfinder/pathfinder.png");
-//		transpose(matrix);
-		show(matrix, 3);
-		Walker walker = new Walker(matrix);
-		int cnt = 0;
-		while (!walker.noProgress()) {
-			walker.iterate();
-			cnt++;
-			System.out.println("iteration "+cnt);
-		}
-		show(walker.getShortestPath(), 11);
-		List<Point> way = walker.getShortestWay();
-		System.out.println("COST: "+walker.getShortestPath()[way.get(0).y()][way.get(0).x()]);
-		System.out.println(way);
-	}
-
 
 	private static void transpose(int[][] matrix) {
 		for (int row=0; row<matrix.length; row++) {
@@ -321,8 +308,75 @@ public class PathFinder {
 		}
 	}
 
+	private static void writeSolution(String inputFilename, String outputFilename, List<Point> wayPoints, boolean transposed) throws IOException {
+		BufferedImage img = ImageIO.read(new File(inputFilename));
+		int xOffset = 95;
+		int yOffset = 95;
+		int numSize = 10;
+		int rows = 101;
+		int cols = 101;
+		int row;
+		int col;
+		
+		for (Point wayPoint:wayPoints) {
+			if (transposed) {
+				row = wayPoint.x();
+				col = wayPoint.y();
+			}
+			else {
+				row = wayPoint.y();
+				col = wayPoint.x();
+			}
+			for (int y=0; y<numSize-1; y++) {
+				for (int x=0; x<numSize-1; x++) {
+					int rgb = img.getRGB(xOffset+col*numSize+x,yOffset+row*numSize+y);
+					rgb = rgb | 0xff0000;
+					img.setRGB(xOffset+col*numSize+x,yOffset+row*numSize+y, rgb);
+				}
+			}
+		}
+		ImageIO.write(img, "png", new File(outputFilename));
+		showImg(img);
+	}
 
+	private static void showImg(BufferedImage img) {
+		JFrame frame = new JFrame();
+		frame.getContentPane().add(new JLabel(new ImageIcon(img)));
+		frame.pack();
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // if you want the X button to close the app
+	}
 
+	public static void solve(String inputFile, String outputFile, boolean transpose) throws IOException {
 
+		int[][] matrix = readMatrix(inputFile);
+		if (transpose) {
+			transpose(matrix);
+		}
+		show(matrix, 3);
+		Walker walker = new Walker(matrix);
+		int cnt = 0;
+		while (!walker.noProgress()) {
+			walker.iterate();
+			cnt++;
+			System.out.println("iteration "+cnt);
+		}
+		show(walker.getShortestPath(), 5);
+		System.out.println();
+		List<Point> way = walker.getShortestWay();
+		for (Point p:way) {
+			System.out.println(p+" +"+matrix[p.y()][p.x()]+" = "+walker.getShortestPath()[p.y()][p.x()]);
+		}
+		System.out.println("COST: "+walker.getShortestPath()[way.get(0).y()][way.get(0).x()]);
+		System.out.println(way);
+		writeSolution(inputFile, outputFile, walker.getShortestWay(), transpose);
+		System.out.println();
+	}
+
+	public static void main(String[] args) throws IOException {
+		solve("input/pathfinder/pathfinder.png", "input/pathfinder/pathfinder_solution_OST_WEST.png", false); 
+		solve("input/pathfinder/pathfinder.png", "input/pathfinder/pathfinder_solution_NORD_SUED.png", true); 
+	}
+	
 	
 }
