@@ -176,10 +176,10 @@ public class PathFinder {
 		public boolean noProgress() {
 			return lastMinChanged == Integer.MAX_VALUE;
 		}
-		public int[][] getShortestPath() {
+		public int[][] getShortestPathArray() {
 			return shortestPath;
 		}
-		public List<Point> getShortestWay() {
+		public List<Point> calcShortestWay() {
 			int bestRow = 0;
 			for (int row=1; row<rows; row++) {
 				if (shortestPath[row][cols-1]<shortestPath[bestRow][cols-1]) {
@@ -242,7 +242,6 @@ public class PathFinder {
 		
 		int[][] result = new int[rows][cols];
 		
-		int sum = 0;
 		for (int row=0; row<rows; row++) {
 			for (int col=0; col<cols; col++) {
 				String pixels10 = ""; 
@@ -361,15 +360,15 @@ public class PathFinder {
 			cnt++;
 			System.out.println("iteration "+cnt);
 		}
-		show(walker.getShortestPath(), 5);
+		show(walker.getShortestPathArray(), 5);
 		System.out.println();
-		List<Point> way = walker.getShortestWay();
+		List<Point> way = walker.calcShortestWay();
 		for (Point p:way) {
-			System.out.println(p+" +"+matrix[p.y()][p.x()]+" = "+walker.getShortestPath()[p.y()][p.x()]);
+			System.out.println(p+" +"+matrix[p.y()][p.x()]+" = "+walker.getShortestPathArray()[p.y()][p.x()]);
 		}
-		System.out.println("COST: "+walker.getShortestPath()[way.get(0).y()][way.get(0).x()]);
+		System.out.println("COST: "+walker.getShortestPathArray()[way.get(0).y()][way.get(0).x()]);
 		System.out.println(way);
-		writeSolution(inputFile, outputFile, walker.getShortestWay(), transpose);
+		writeSolution(inputFile, outputFile, walker.calcShortestWay(), transpose);
 		System.out.println();
 	}
 
